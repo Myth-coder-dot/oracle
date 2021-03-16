@@ -32,7 +32,7 @@ and d.department_name in ('IT','Sales')
 GROUP BY d.department_name;
 ```
    查询结果截图：  
-     ![res1](res1.png)
+     ![res1](res1.png)  
    所用时间：
      ![res3](res3.png)
 
