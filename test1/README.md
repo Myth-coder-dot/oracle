@@ -31,9 +31,9 @@ where d.department_id = e.department_id
 and d.department_name in ('IT','Sales')
 GROUP BY d.department_name;
 ```
-    查询结果截图：
+   查询结果截图：
      ![res1](res1.png)
-    所用时间：
+   所用时间：
      ![res3](res3.png)
 
 - 查询2:
@@ -49,9 +49,9 @@ WHERE d.department_id = e.department_id
 GROUP BY d.department_name
 HAVING d.department_name in ('IT','Sales');
 ```
-    查询结果截图：
+   查询结果截图：
      ![res2](res2.png)
-    所用时间：
+   所用时间：
      ![res4](res4.png)
     
     1）分析：根据Oracle SQL语句的运行结果来看，查询一运用了分组查询的语句：GROUP语句，并用部门姓名进行分组用where语句去找满足条件
@@ -95,6 +95,6 @@ from hr.departments d,hr.employees e where d.department_id=e.department_id GROUP
     部门ID和员工ID相等，以部门名分组来达到查询最高工资和最低工资的目的。新添加的查询语句的physical gets等于19，说明自己的
     新增的查询语句从数据库扫描SQL语句量增多。
     
-    3）运行结果截图：
+   运行结果截图：
      ![res5](res5.png)
     
