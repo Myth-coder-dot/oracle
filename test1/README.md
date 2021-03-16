@@ -84,7 +84,7 @@ GROUP BY
 
     
 ### 3.设计自己的查询语句，并作相应的分析，查询语句不能太简单。  
-    1）代码：
+    1）查询一：
 ```SQL
 SELECT d.department_name,count(e.job_id)as "部门总数",
 avg(e.salary)as "平均工资",max(e.salary)as "最高工资",
@@ -92,10 +92,28 @@ min(e.salary)as "最低工资"
 from hr.departments d,hr.employees e where d.department_id=e.department_id GROUP BY d.department_name;
 ```    
     
-    2）分析：在原来的查找部门总数和平均工资的基础上，新添加查找最高工资最低工资的查询语句。该查询语句通过从部门表和员工表判断
+    分析：在原来的查找部门总数和平均工资的基础上，新添加查找最高工资最低工资的查询语句。该查询语句通过从部门表和员工表判断
     部门ID和员工ID相等，以部门名分组来达到查询最高工资和最低工资的目的。新添加的查询语句的physical gets等于19，说明自己的
     新增的查询语句从数据库扫描SQL语句量增多。
     
    运行结果截图：
      ![res5](res5.png)
-    
+ ```text     
+ 
+   2) 查询二： 
+ ```SQL
+ select departments.department_name as "部门", 
+ count(employees.job_id) as "部门总人数", 
+ avg(employees.salary) as "平均工资" from employees 
+ right join departments on employees.department_id = departments.department_id 
+ where department_name in ('IT','Sales') 
+ group by departments.department_name
+```    
+    分析： 这次的查询语句是从员工表中读取平均工资和部门总人数，然后利用部门id通过左连接的方式来连接两个员工表和部门表中的内
+    容，然后从中读取两个部门的总人数和平均工资。从运行结果中可以看出，花费的时间比教材中的第一种方式更差，比第二种方式更优一点。
+    对于查询的优化，仍然是建立索引来达到优化的结果。
+  
+   运行结果截图：
+     ![res6](res6.png)
+  
+  
