@@ -18,34 +18,36 @@
 
   执行上面两个比较复杂的返回相同查询结果数据集的SQL语句，通过分析SQL语句各自的执行计划，判断哪个SQL语句是最优的。最后将你认为最优的SQL语句通过sqldeveloper的优化指导工具进行优化指  导，看看该工具有没有给出优化建议
     
-   查询1：
-      
-      ```SQL
-      set autotrace on
+查询1：
 
-      SELECT d.department_name,count(e.job_id)as "部门总人数",
-      avg(e.salary)as "平均工资"
-      from hr.departments d,hr.employees e
-      where d.department_id = e.department_id
-      and d.department_name in ('IT','Sales')
-      GROUP BY d.department_name;
-      ```
-   查询2
-      
-      ```SQL
-      set autotrace on
+```SQL
+set autotrace on
 
-      SELECT d.department_name,count(e.job_id)as "部门总人数",
-      avg(e.salary)as "平均工资"
-      FROM hr.departments d,hr.employees e
-      WHERE d.department_id = e.department_id
-      GROUP BY d.department_name
-      HAVING d.department_name in ('IT','Sales');
-      ```
-      1）分析：
+SELECT d.department_name,count(e.job_id)as "部门总人数",
+avg(e.salary)as "平均工资"
+from hr.departments d,hr.employees e
+where d.department_id = e.department_id
+and d.department_name in ('IT','Sales')
+GROUP BY d.department_name;
+```
+
+- 查询2
+
+```SQL
+set autotrace on
+
+SELECT d.department_name,count(e.job_id)as "部门总人数",
+avg(e.salary)as "平均工资"
+FROM hr.departments d,hr.employees e
+WHERE d.department_id = e.department_id
+GROUP BY d.department_name
+HAVING d.department_name in ('IT','Sales');
+```
+
+   1）分析：
       
       
-      2）建议：
+   2）建议：
          
    
 
