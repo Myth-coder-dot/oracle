@@ -114,6 +114,6 @@ from hr.departments d,hr.employees e where d.department_id=e.department_id GROUP
     对于查询的优化，仍然是建立索引来达到优化的结果。
   
    运行结果截图：  
-     ![res6](res6.png)
+     ![res6](./res6.png)
   
   
