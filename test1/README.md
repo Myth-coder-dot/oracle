@@ -48,7 +48,8 @@ HAVING d.department_name in ('IT','Sales');
     1）分析：根据Oracle SQL语句的运行结果来看，查询一运用了分组查询的语句：GROUP语句，并用部门姓名进行分组用where语句去找满足条件
     的IT和Sales。大大缩短了查询时间，不需要像查询二一样分组后用HAVING再去大量地筛选。而且查询一的physical reads为0，说明从磁盘请
     求到Buffer Cache的数据量很少，意味着不需要从系统库存里大量全表扫描SQL语句。它的consistent gets为9，意味着它需要从Buffer cache
-    中读取的undo数据的block数据为9，相较于第二条SQL语句读取数据更少，效率更高。从运行结果的时间来看，查询一的语句最优，平均用时0.091s，比查询二的0.11s平均快了0.02s。
+    中读取的undo数据的block数据为9，相较于第二条SQL语句读取数据更少，效率更高。从运行结果的时间来看，查询一的语句最优，平均用时
+    0.091s，比查询二的0.11s平均快了0.02s。
       
       
     2）建议：查询一通过sqldeveloper的优化指导工具进行优化指导，代码为：
@@ -81,5 +82,6 @@ min(e.salary)as "最低工资"
 from hr.departments d,hr.employees e where d.department_id=e.department_id GROUP BY d.department_name;
 ```    
     
-    2）分析：在原来的查找部门总数和平均工资的基础上，新添加查找最高工资最低工资的查询语句，新添加的查询语句的physical gets等于19，
-    说明自己的新增的查询语句从数据库扫描SQL语句量增多。
+    2）分析：在原来的查找部门总数和平均工资的基础上，新添加查找最高工资最低工资的查询语句。该查询语句通过从部门表和员工表判断
+    部门ID和员工ID相等，以部门名分组来达到查询最高工资和最低工资的目的。新添加的查询语句的physical gets等于19，说明自己的
+    新增的查询语句从数据库扫描SQL语句量增多。
