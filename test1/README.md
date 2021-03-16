@@ -50,7 +50,7 @@ GROUP BY d.department_name
 HAVING d.department_name in ('IT','Sales');
 ```
    查询结果截图：    
-     ![res2](res2.png)
+     ![res2](res2.png)  
    所用时间：    
      ![res4](res4.png)
     
