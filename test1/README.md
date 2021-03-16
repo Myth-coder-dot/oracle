@@ -31,7 +31,7 @@ where d.department_id = e.department_id
 and d.department_name in ('IT','Sales')
 GROUP BY d.department_name;
 ```
-   查询结果截图：
+   查询结果截图：  
      ![res1](res1.png)
    所用时间：
      ![res3](res3.png)
@@ -49,7 +49,7 @@ WHERE d.department_id = e.department_id
 GROUP BY d.department_name
 HAVING d.department_name in ('IT','Sales');
 ```
-   查询结果截图：
+   查询结果截图：  
      ![res2](res2.png)
    所用时间：
      ![res4](res4.png)
