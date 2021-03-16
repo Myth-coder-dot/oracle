@@ -113,7 +113,6 @@ from hr.departments d,hr.employees e where d.department_id=e.department_id GROUP
     容，然后从中读取两个部门的总人数和平均工资。从运行结果中可以看出，花费的时间比教材中的第一种方式更差，比第二种方式更优一点。
     对于查询的优化，仍然是建立索引来达到优化的结果。
   
-   运行结果截图：  
-     ![res6](./res6.png)
+  
   
   
