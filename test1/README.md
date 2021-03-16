@@ -51,7 +51,7 @@ HAVING d.department_name in ('IT','Sales');
 ```
    查询结果截图：    
      ![res2](res2.png)
-   所用时间：  
+   所用时间：    
      ![res4](res4.png)
     
     1）分析：根据Oracle SQL语句的运行结果来看，查询一运用了分组查询的语句：GROUP语句，并用部门姓名进行分组用where语句去找满足条件
