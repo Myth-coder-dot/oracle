@@ -11,9 +11,7 @@
 
 ## 三.实验步骤
 ### 1.对Oracle12c中的HR人力资源管理系统中的表进行查询与分析。
-    1）代码：
-    
-    2）分析:
+ 
     
 ### 2.分析两个教材中的查询语句，判断哪个SQL语句是最优的 
 
@@ -45,7 +43,7 @@ GROUP BY d.department_name
 HAVING d.department_name in ('IT','Sales');
 ```
 
-    1）分析：根据Oracle SQL语句的运行结果来看，查询一的sql语句最优，用时0.091s,比查询二的0.11s平均快了0.02s
+    1）分析：根据Oracle SQL语句的运行结果来看，查询一的physical reads为0，说明从磁盘请求到Buffer Cache的数据量很少，意味着不需要从系统库存里大量全表扫描SQL语句。它的consistent gets为9，意味着它需要从Buffer cache中读取的undo数据的block数据为9，相较于第二条SQL语句读取数据更少，效率更高。 该SQL语句执行效率较优执行优化指导查询一的sql。从运行结果来看，查询一语句最优，用时0.091s,比查询二的0.11s平均快了0.02s
       
       
     2）建议：查询一通过sqldeveloper的优化指导工具进行优化指导，代码为：
@@ -69,9 +67,13 @@ GROUP BY
 ```
  
     
-    
 ### 3.设计自己的查询语句，并作相应的分析，查询语句不能太简单。  
     1）代码：
+```SQL
+SELECT d.department_name,count(e.job_id)as "部门总数",
+avg(e.salary)as "平均工资",max(e.salary)as "最高工资",
+min(e.salary)as "最低工资" 
+from hr.departments d,hr.employees e where d.department_id=e.department_id GROUP BY d.department_name;
+```    
     
-    
-    2）分析：
+    2）分析：在元查找部门总数和平均工资的基础上，新添加查找最高工资最低工资的查询语句，新填查询语句后physical gets等于19，说明在新增加查询语句后从数据库扫描SQL语句量增多。
