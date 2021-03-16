@@ -53,7 +53,7 @@ HAVING d.department_name in ('IT','Sales');
     中读取的undo数据的block数据为9，相较于第二条SQL语句读取数据更少，效率更高。从运行结果的时间来看，查询一的语句最优，平均用时
     0.091s，比查询二的0.11s平均快了0.02s。
       
-```text      
+     
     2）建议：查询一通过sqldeveloper的优化指导工具进行优化指导，代码为：
     
 ```SQL
