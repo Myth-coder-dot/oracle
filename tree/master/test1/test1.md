@@ -29,7 +29,7 @@
       where d.department_id = e.department_id
       and d.department_name in ('IT','Sales')
       GROUP BY d.department_name;
-
+      ```
       查询2
       
       ```SQL
@@ -41,7 +41,7 @@
       WHERE d.department_id = e.department_id
       GROUP BY d.department_name
       HAVING d.department_name in ('IT','Sales');
-      
+      ```
       1）分析：
       
       
