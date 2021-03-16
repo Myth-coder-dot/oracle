@@ -84,7 +84,7 @@ GROUP BY
 
     
 ### 3.设计自己的查询语句，并作相应的分析，查询语句不能太简单。  
-    1）查询一：
+   1) 查询一：
 ```SQL
 SELECT d.department_name,count(e.job_id)as "部门总数",
 avg(e.salary)as "平均工资",max(e.salary)as "最高工资",
@@ -98,7 +98,7 @@ from hr.departments d,hr.employees e where d.department_id=e.department_id GROUP
     
    运行结果截图：
      ![res5](res5.png)
- ```text     
+     
  
    2) 查询二： 
  ```SQL
