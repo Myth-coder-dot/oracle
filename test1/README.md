@@ -96,7 +96,7 @@ from hr.departments d,hr.employees e where d.department_id=e.department_id GROUP
     部门ID和员工ID相等，以部门名分组来达到查询最高工资和最低工资的目的。新添加的查询语句的physical gets等于19，说明自己的
     新增的查询语句从数据库扫描SQL语句量增多。
     
-   运行结果截图：
+   运行结果截图：  
      ![res5](res5.png)
      
  
