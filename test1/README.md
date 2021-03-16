@@ -53,7 +53,7 @@ HAVING d.department_name in ('IT','Sales');
    查询结果截图：  
    ![res2](./res2.png)  
    所用时间：    
-     ![res4](./res4.png)
+    ![res4](./res4.png)
     
     1）分析：根据Oracle SQL语句的运行结果来看，查询一运用了分组查询的语句：GROUP语句，并用部门姓名进行分组用where语句去找满足条件
     的IT和Sales。大大缩短了查询时间，不需要像查询二一样分组后用HAVING再去大量地筛选。而且查询一的physical reads为0，说明从磁盘请
