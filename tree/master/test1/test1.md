@@ -44,10 +44,29 @@ GROUP BY d.department_name
 HAVING d.department_name in ('IT','Sales');
 ```
 
-    1）分析：
+    1）分析：根据Oracle SQL语句的运行结果来看，查询一的sql语句最优，用时0.091s,比查询二的0.11s平均快了0.02s
       
       
-    2）建议：
+    2）建议：查询一通过sqldeveloper的优化指导工具进行优化指导，代码为：
+    
+```SQL
+set autotrace on
+
+SELECT
+	d.department_name,
+	count( e.job_id ) AS "部门总人数",
+	avg( e.salary ) AS "平均工资" 
+FROM
+	hr.departments d,
+	hr.employees e 
+WHERE
+	d.department_id = e.department_id 
+	AND d.department_name IN ( 'IT', 'Sales' ) 
+GROUP BY
+	d.department_name;
+
+```
+ 
     
     
 ### 3.设计自己的查询语句，并作相应的分析，查询语句不能太简单。  
