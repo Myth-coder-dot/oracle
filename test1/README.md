@@ -17,7 +17,7 @@
 
   执行上面两个比较复杂的返回相同查询结果数据集的SQL语句，通过分析SQL语句各自的执行计划，判断哪个SQL语句是最优的。最后将你认为最优的SQL语句通过sqldeveloper的优化指导工具进行优化指  导，看看该工具有没有给出优化建议
     
--查询1：
+- 查询1：
 
 ```SQL
 set autotrace on
@@ -30,7 +30,7 @@ and d.department_name in ('IT','Sales')
 GROUP BY d.department_name;
 ```
 
-- 查询2
+- 查询2:
 
 ```SQL
 set autotrace on
@@ -43,7 +43,10 @@ GROUP BY d.department_name
 HAVING d.department_name in ('IT','Sales');
 ```
 
-    1）分析：根据Oracle SQL语句的运行结果来看，查询一的physical reads为0，说明从磁盘请求到Buffer Cache的数据量很少，意味着不需要从系统库存里大量全表扫描SQL语句。它的consistent gets为9，意味着它需要从Buffer cache中读取的undo数据的block数据为9，相较于第二条SQL语句读取数据更少，效率更高。 该SQL语句执行效率较优执行优化指导查询一的sql。从运行结果来看，查询一语句最优，用时0.091s,比查询二的0.11s平均快了0.02s
+    1）分析：根据Oracle SQL语句的运行结果来看，查询一运用了分组查询的语句：GROUP，用部门姓名进行分组用where语句去找满足条件的IT和Sales。
+    大大缩短了查询时间，不需要像查询二一样分组后用HAVING再去大量地筛选。而且查询一的physical reads为0，说明从磁盘请求到Buffer Cache的数据量很少，
+    意味着不需要从系统库存里大量全表扫描SQL语句。它的consistent gets为9，意味着它需要从Buffer cache中读取的undo数据的block数据为9，
+    相较于第二条SQL语句读取数据更少，效率更高。从运行结果的时间来看，查询一的语句最优，平均用时0.091s，比查询二的0.11s平均快了0.02s。
       
       
     2）建议：查询一通过sqldeveloper的优化指导工具进行优化指导，代码为：
@@ -76,4 +79,5 @@ min(e.salary)as "最低工资"
 from hr.departments d,hr.employees e where d.department_id=e.department_id GROUP BY d.department_name;
 ```    
     
-    2）分析：在元查找部门总数和平均工资的基础上，新添加查找最高工资最低工资的查询语句，新填查询语句后physical gets等于19，说明在新增加查询语句后从数据库扫描SQL语句量增多。
+    2）分析：在原来的查找部门总数和平均工资的基础上，新添加查找最高工资最低工资的查询语句，新添加的查询语句的physical gets等于19，
+    说明自己的新增的查询语句从数据库扫描SQL语句量增多。
