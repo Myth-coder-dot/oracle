@@ -33,6 +33,11 @@ Grant succeeded.
 SQL> exit
 ```
 
+   结果截图：  
+     ![](./1.png)    
+     ![](./2.png)
+     ![](./3.png)
+
 > 语句“ALTER USER new_user QUOTA 50M ON users;”是指授权new_user用户访问users表空间，空间限额是50M。
 
 - 第2步：新用户new_user连接到pdborcl，创建表mytable和视图myview，插入数据，最后将myview的SELECT对象权限授予hr用户。
@@ -58,6 +63,9 @@ SQL> GRANT SELECT ON myview TO hr;
 Grant succeeded.
 SQL>exit
 ```
+结果截图：  
+     ![](./4.png)    
+  
 
 - 第3步：用户hr连接到pdborcl，查询new_user授予它的视图myview
 
@@ -70,7 +78,9 @@ zhang
 wang
 SQL> exit
 ```
-
+结果截图：  
+     ![](./5.png) 
+     
 > 测试一下同学用户之间的表的共享，只读共享和读写共享都测试一下。
 
 ### 2.数据库和表空间占用分析
@@ -98,6 +108,8 @@ SQL>SELECT a.tablespace_name "表空间名",Total/1024/1024 "大小MB",
         group  BY tablespace_name)b
  where  a.tablespace_name = b.tablespace_name;
 ```
-
+结果截图：  
+     ![](./6.png)    
+  
 - autoextensible是显示表空间中的数据文件是否自动增加。
 - MAX_MB是指数据文件的最大容量。
