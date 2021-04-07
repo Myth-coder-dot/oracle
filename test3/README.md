@@ -22,7 +22,7 @@ ALTER USER new_xgh QUOTA UNLIMITED ON USERS;
 ALTER USER new_xgh QUOTA UNLIMITED ON USERS02;
 ALTER USER new_xgh QUOTA UNLIMITED ON USERS03;
 ```
- ![](./1.png)  
+ ![](./01.png)  
 
 
 
@@ -33,10 +33,6 @@ ALTER USER new_xgh QUOTA UNLIMITED ON USERS03;
 SQL>@test3.sql
 SQL>exit
 ```
- 
-     ![](./1.png)    
-     ![](./2.png)
-     ![](./3.png)
 
 
 
