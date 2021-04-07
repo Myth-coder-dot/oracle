@@ -21,77 +21,13 @@
 
 
 
-
-
+(2).用自己的账号new_xgh登录,并运行脚本文件 test3.sql:
 ```sql
-SQL>CREATE TABLESPACE users02 DATAFILE
-'/home/student/你的目录/pdbtest_users02_1.dbf'
-  SIZE 100M AUTOEXTEND ON NEXT 50M MAXSIZE UNLIMITED，
-'/home/student/你的目录/pdbtest_users02_2.dbf' 
-  SIZE 100M AUTOEXTEND ON NEXT 50M MAXSIZE UNLIMITED
-EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
+[student@deep02 ~]$cat test3.sql
+[student@deep02 ~]$sqlplus zjf_201810513329/123@localhost/pdborcl
+SQL>@test3.sql
+SQL>exit
 
-SQL>CREATE TABLESPACE users03 DATAFILE
-'/home/student/你的目录/pdbtest_users02_1.dbf'
-  SIZE 100M AUTOEXTEND ON NEXT 50M MAXSIZE UNLIMITED，
-'/home/student/你的目录/pdbtest_users02_2.dbf' 
-  SIZE 100M AUTOEXTEND ON NEXT 50M MAXSIZE UNLIMITED
-EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
-
-SQL> 
-
-CREATE TABLE orders 
-(
- order_id NUMBER(10, 0) NOT NULL 
- , customer_name VARCHAR2(40 BYTE) NOT NULL 
- , customer_tel VARCHAR2(40 BYTE) NOT NULL 
- , order_date DATE NOT NULL 
- , employee_id NUMBER(6, 0) NOT NULL 
- , discount NUMBER(8, 2) DEFAULT 0 
- , trade_receivable NUMBER(8, 2) DEFAULT 0 
- , CONSTRAINT ORDERS_PK PRIMARY KEY 
-  (
-    ORDER_ID 
-  )
-) 
-TABLESPACE USERS 
-PCTFREE 10 INITRANS 1 
-STORAGE (   BUFFER_POOL DEFAULT ) 
-NOCOMPRESS NOPARALLEL 
-
-PARTITION BY RANGE (order_date) 
-(
- PARTITION PARTITION_BEFORE_2016 VALUES LESS THAN (
- TO_DATE(' 2016-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 
- 'NLS_CALENDAR=GREGORIAN')) 
- NOLOGGING
- TABLESPACE USERS
- PCTFREE 10 
- INITRANS 1 
- STORAGE 
-( 
- INITIAL 8388608 
- NEXT 1048576 
- MINEXTENTS 1 
- MAXEXTENTS UNLIMITED 
- BUFFER_POOL DEFAULT 
-) 
-NOCOMPRESS NO INMEMORY  
-, PARTITION PARTITION_BEFORE_2020 VALUES LESS THAN (
-TO_DATE(' 2020-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 
-'NLS_CALENDAR=GREGORIAN')) 
-NOLOGGING 
-TABLESPACE USERS
-, PARTITION PARTITION_BEFORE_2021 VALUES LESS THAN (
-TO_DATE(' 2021-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 
-'NLS_CALENDAR=GREGORIAN')) 
-NOLOGGING 
-TABLESPACE USERS02
-);
---以后再逐年增加新年份的分区
-ALTER TABLE orders ADD PARTITION partition_before_2022
-VALUES LESS THAN(TO_DATE('2022-01-01','YYYY-MM-DD'))
-TABLESPACE USERS03;
 
 
 
@@ -103,67 +39,181 @@ TABLESPACE USERS03;
      ![](./2.png)
      ![](./3.png)
 
-> 语句“ALTER USER new_user QUOTA 50M ON users;”是指授权new_user用户访问users表空间，空间限额是50M。
 
-- 第2步：新用户new_user连接到pdborcl，创建表mytable和视图myview，插入数据，最后将myview的SELECT对象权限授予hr用户。
 
+### 2.在表空间中创建两张表：
+(1).创建orders表代码如下：
 ```sql
-$ sqlplus new_user/123@pdborcl
-SQL> show user;
-USER is "NEW_USER"
-SQL> CREATE TABLE mytable (id number,name varchar(50));
-Table created.
-SQL> INSERT INTO mytable(id,name)VALUES(1,'zhang');
-1 row created.
-SQL> INSERT INTO mytable(id,name)VALUES (2,'wang');
-1 row created.
-SQL> CREATE VIEW myview AS SELECT name FROM mytable;
-View created.
-SQL> SELECT * FROM myview;
-NAME
---------------------------------------------------
-zhang
-wang
-SQL> GRANT SELECT ON myview TO hr;
-Grant succeeded.
-SQL>exit
-```
-结果截图：  
-     ![](./4.png)    
+SQL>CREATE TABLESPACE users02 DATAFILE
+  '/home/student/你的目录/pdbtest_users02_1.dbf'
+    SIZE 100M AUTOEXTEND ON NEXT 50M MAXSIZE UNLIMITED，
+  '/home/student/你的目录/pdbtest_users02_2.dbf' 
+    SIZE 100M AUTOEXTEND ON NEXT 50M MAXSIZE UNLIMITED
+  EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
   
+  SQL>CREATE TABLESPACE users03 DATAFILE
+  '/home/student/你的目录/pdbtest_users02_1.dbf'
+    SIZE 100M AUTOEXTEND ON NEXT 50M MAXSIZE UNLIMITED，
+  '/home/student/你的目录/pdbtest_users02_2.dbf'
+    SIZE 100M AUTOEXTEND ON NEXT 50M MAXSIZE UNLIMITED
+  EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
+  
+  SQL> CREATE TABLE orders
+  (
+   order_id NUMBER(10, 0) NOT NULL
+   , customer_name VARCHAR2(40 BYTE) NOT NULL
+   , customer_tel VARCHAR2(40 BYTE) NOT NULL
+   , order_date DATE NOT NULL
+   , employee_id NUMBER(6, 0) NOT NULL
+   , discount NUMBER(8, 2) DEFAULT 0
+   , trade_receivable NUMBER(8, 2) DEFAULT 0
+  )
+  TABLESPACE USERS
+  PCTFREE 10 INITRANS 1
+  STORAGE (   BUFFER_POOL DEFAULT )
+  NOCOMPRESS NOPARALLEL
+  PARTITION BY RANGE (order_date)
+  
+   PARTITION PARTITION_BEFORE_2016 VALUES LESS THAN (
+   TO_DATE(' 2016-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS',
+   'NLS_CALENDAR=GREGORIAN'))
+   NOLOGGING
+   TABLESPACE USERS
+   PCTFREE 10
+   INITRANS 1
+   STORAGE
+  (
+   INITIAL 8388608
+   NEXT 1048576
+   MINEXTENTS 1
+   MAXEXTENTS UNLIMITED
+   BUFFER_POOL DEFAULT
+  )
+  NOCOMPRESS NO INMEMORY  
+  , PARTITION PARTITION_BEFORE_2017 VALUES LESS THAN (
+  TO_DATE(' 2017-01-01 00:00:00', 'SYYYY-MM-DD HH24:MI:SS',
+  'NLS_CALENDAR=GREGORIAN'))
+  NOLOGGING
+  TABLESPACE USERS02
+  ...
+  );
+ ```
+ (2).创建order_details表的部分语句如下：
+ ```sql
+ SQL> CREATE TABLE order_details 
+  (
+  id NUMBER(10, 0) NOT NULL 
+  , order_id NUMBER(10, 0) NOT NULL
+  , product_id VARCHAR2(40 BYTE) NOT NULL 
+  , product_num NUMBER(8, 2) NOT NULL 
+  , product_price NUMBER(8, 2) NOT NULL 
+  , CONSTRAINT order_details_fk1 FOREIGN KEY  (order_id)
+  REFERENCES orders  (  order_id   )
+  ENABLE 
+  ) 
+  TABLESPACE USERS 
+  PCTFREE 10 INITRANS 1 
+  STORAGE (   BUFFER_POOL DEFAULT ) 
+  NOCOMPRESS NOPARALLEL
+  PARTITION BY REFERENCE (order_details_fk1)
+  (
+  PARTITION PARTITION_BEFORE_2016 
+  NOLOGGING 
+  TABLESPACE USERS --必须指定表空间,否则会将分区存储在用户的默认表空间中
+  ...
+  ) 
+  NOCOMPRESS NO INMEMORY, 
+  PARTITION PARTITION_BEFORE_2017 
+  NOLOGGING 
+  TABLESPACE USERS02
+  ...
+  ) 
+  NOCOMPRESS NO INMEMORY  
+  );
+  ```
+  (3).表创建成功后，插入数据，数据能并平均分布到各个分区：
+  ```sql
+  for i in 1..10000
+    loop
+      if i mod 6 =0 then
+        dt:=to_date('2015-3-2','yyyy-mm-dd')+(i mod 60); --PARTITION_2015
+      elsif i mod 6 =1 then
+        dt:=to_date('2016-3-2','yyyy-mm-dd')+(i mod 60); --PARTITION_2016
+      elsif i mod 6 =2 then
+        dt:=to_date('2017-3-2','yyyy-mm-dd')+(i mod 60); --PARTITION_2017
+      elsif i mod 6 =3 then
+        dt:=to_date('2018-3-2','yyyy-mm-dd')+(i mod 60); --PARTITION_2018
+      elsif i mod 6 =4 then
+        dt:=to_date('2019-3-2','yyyy-mm-dd')+(i mod 60); --PARTITION_2019
+      else
+        dt:=to_date('2020-3-2','yyyy-mm-dd')+(i mod 60); --PARTITION_2020
+      end if;
+      V_EMPLOYEE_ID:=CASE I MOD 6 WHEN 0 THEN 11 WHEN 1 THEN 111 WHEN 2 THEN 112
+                                  WHEN 3 THEN 12 WHEN 4 THEN 121 ELSE 122 END;
+      --插入订单
+      v_order_id:=i;
+      v_name := 'aa'|| 'aa';
+      v_name := 'zhang' || i;
+      v_tel := '139888883' || i;
+      insert /*+append*/ into ORDERS (ORDER_ID,CUSTOMER_NAME,CUSTOMER_TEL,ORDER_DATE,EMPLOYEE_ID,DISCOUNT)
+        values (v_order_id,v_name,v_tel,dt,V_EMPLOYEE_ID,dbms_random.value(100,0));
+      --插入订单y一个订单包括3个产品
+      v:=dbms_random.value(10000,4000);
+      v_name:='computer'|| (i mod 3 + 1);
+      insert /*+append*/ into ORDER_DETAILS(ID,ORDER_ID,PRODUCT_NAME,PRODUCT_NUM,PRODUCT_PRICE)
+        values (v_order_detail_id,v_order_id,v_name,2,v);
+      v:=dbms_random.value(1000,50);
+      v_name:='paper'|| (i mod 3 + 1);
+      v_order_detail_id:=v_order_detail_id+1;
+      insert /*+append*/ into ORDER_DETAILS(ID,ORDER_ID,PRODUCT_NAME,PRODUCT_NUM,PRODUCT_PRICE)
+        values (v_order_detail_id,v_order_id,v_name,3,v);
+      v:=dbms_random.value(9000,2000);
+      v_name:='phone'|| (i mod 3 + 1);
+  
+      v_order_detail_id:=v_order_detail_id+1;
+      insert /*+append*/ into ORDER_DETAILS(ID,ORDER_ID,PRODUCT_NAME,PRODUCT_NUM,PRODUCT_PRICE)
+        values (v_order_detail_id,v_order_id,v_name,1,v);
+      --在触发器关闭的情况下，需要手工计算每个订单的应收金额：
+      select sum(PRODUCT_NUM*PRODUCT_PRICE) into m from ORDER_DETAILS where ORDER_ID=v_order_id;
+      if m is null then
+       m:=0;
+      end if;
+      UPDATE ORDERS SET TRADE_RECEIVABLE = m - discount WHERE ORDER_ID=v_order_id;
+      IF I MOD 1000 =0 THEN
+        commit; --每次提交会加快插入数据的速度
+      END IF;
+    end loop;
+  end;
+  ```
 
-- 第3步：用户hr连接到pdborcl，查询new_user授予它的视图myview
 
-```sql
-$ sqlplus hr/123@pdborcl
-SQL> SELECT * FROM new_user.myview;
-NAME
---------------------------------------------------
-zhang
-wang
-SQL> exit
-```
-结果截图：  
-     ![](./5.png) 
-     
-> 测试一下同学用户之间的表的共享，只读共享和读写共享都测试一下。
+### 3.写出插入数据的语句和查询数据的语句，并分析语句的执行计划。
+(1).查询数据条数：
+  ```sql
+  select count(*) from zjf_201810513329.orders;
+  select count(*) from zjf_201810513329.order_details;
+  ```
 
-### 2.数据库和表空间占用分析
+(2).查询2017-1-1至2018-6-1的订单：
+  ```sql
+  select * from zjf_201810513329.orders where order_date
+  between to_date('2017-1-1','yyyy-mm-dd') and to_date('2018-6-1','yyyy-mm-dd');
+  ```
+(3).查询2017-1-1至2018-6-1的订单详情：
+  ```sql
+  select a.ORDER_ID,a.CUSTOMER_NAME,
+  b.product_name,b.product_num,b.product_price
+  from zjf_201810513329.orders a,zjf_201810513329.order_details b where
+  a.ORDER_ID=b.order_id and
+  a.order_date between to_date('2017-1-1','yyyy-mm-dd') and to_date('2018-6-1','yyyy-mm-dd');
+  ```
 
-> 当全班同学的实验都做完之后，数据库pdborcl中包含了每个同学的角色和用户。
-> 所有同学的用户都使用表空间users存储表的数据。
-> 表空间中存储了很多相同名称的表mytable和视图myview，但分别属性于不同的用户，不会引起混淆。
-> 随着用户往表中插入数据，表空间的磁盘使用量会增加。
-
-### 3.查看数据库的使用情况
-
+### 4.查看数据库的使用情况
 以下样例查看表空间的数据库文件，以及每个文件的磁盘占用情况。
-
-```sql
 $ sqlplus system/123@pdborcl
 
+```sql
 SQL>SELECT tablespace_name,FILE_NAME,BYTES/1024/1024 MB,MAXBYTES/1024/1024 MAX_MB,autoextensible FROM dba_data_files  WHERE  tablespace_name='USERS';
-
 SQL>SELECT a.tablespace_name "表空间名",Total/1024/1024 "大小MB",
  free/1024/1024 "剩余MB",( total - free )/1024/1024 "使用MB",
  Round(( total - free )/ total,4)* 100 "使用率%"
@@ -175,10 +225,11 @@ SQL>SELECT a.tablespace_name "表空间名",Total/1024/1024 "大小MB",
 ```
 结果截图：  
      ![](./6.png)    
-  
+     
 - autoextensible是显示表空间中的数据文件是否自动增加。
 - MAX_MB是指数据文件的最大容量。
+- 
 ## 四.实验总结
-通过本次实验，我学习到了orcale数据库用户权限管理的相关知识，了解了用户管理、角色管理、权根维护与分配的能力，掌握用户之间共享对象的操作技能。 
-我们在此学习了创建表空间，创建用户，给用户授权，查看当前用户所有权限，查看当前用户的角色，查看当前用户的系统权限和表级权限，查询用户表，
-显示 当前用户等SQL语句。普通用户之间也是默认不能互相访问的，需要互相授权。
+通过本次实验，我学习到了经过这次实验，我学习到了如何在虚拟机上创建分区表的方法和插入相关数据的语法。明白了在创建分区
+表之前要先创建好分区存储位置，即分配分区存储空间。然后我还了解了如何在自己的用户下进行数据库和表的相关操作，比如运行sql文件等。
+最后还学会了怎么去查看数据库的使用情况。
