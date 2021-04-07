@@ -28,7 +28,7 @@ ALTER USER new_xgh QUOTA UNLIMITED ON USERS03;
 (2).用自己的账号new_xgh登录,并运行脚本文件 test3.sql:
 ```sql
 [student@deep02 ~]$cat test3.sql
-[student@deep02 ~]$sqlplus zjf_201810513329/123@localhost/pdborcl
+[student@deep02 ~]$sqlplus new_xgh/123@localhost/pdborcl
 SQL>@test3.sql
 SQL>exit
 ```
@@ -185,13 +185,13 @@ SQL>CREATE TABLESPACE users02 DATAFILE
 ### 3.写出插入数据的语句和查询数据的语句，并分析语句的执行计划。
 (1).查询数据条数：
   ```sql
-  select count(*) from zjf_201810513329.orders;
-  select count(*) from zjf_201810513329.order_details;
+  select count(*) from new_xgh.orders;
+  select count(*) from new_xgh.order_details;
   ```
    ![](./04.png)  
 (2).查询2017-1-1至2018-6-1的订单：
   ```sql
-  select * from zjf_201810513329.orders where order_date
+  select * from new_xgh.orders where order_date
   between to_date('2017-1-1','yyyy-mm-dd') and to_date('2018-6-1','yyyy-mm-dd');
   ```
    ![](./05.png)  
@@ -199,7 +199,7 @@ SQL>CREATE TABLESPACE users02 DATAFILE
   ```sql
   select a.ORDER_ID,a.CUSTOMER_NAME,
   b.product_name,b.product_num,b.product_price
-  from zjf_201810513329.orders a,zjf_201810513329.order_details b where
+  from new_xgh.orders a,new_xgh.order_details b where
   a.ORDER_ID=b.order_id and
   a.order_date between to_date('2017-1-1','yyyy-mm-dd') and to_date('2018-6-1','yyyy-mm-dd');
   ```
