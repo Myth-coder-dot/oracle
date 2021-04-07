@@ -22,8 +22,7 @@ ALTER USER new_xgh QUOTA UNLIMITED ON USERS;
 ALTER USER new_xgh QUOTA UNLIMITED ON USERS02;
 ALTER USER new_xgh QUOTA UNLIMITED ON USERS03;
 ```
-  ![](./01.png)  
-
+   ![](./01.png)  
 
 
 (2).用自己的账号new_xgh登录,并运行脚本文件 test3.sql:
@@ -189,12 +188,13 @@ SQL>CREATE TABLESPACE users02 DATAFILE
   select count(*) from zjf_201810513329.orders;
   select count(*) from zjf_201810513329.order_details;
   ```
-
+   ![](./04.png)  
 (2).查询2017-1-1至2018-6-1的订单：
   ```sql
   select * from zjf_201810513329.orders where order_date
   between to_date('2017-1-1','yyyy-mm-dd') and to_date('2018-6-1','yyyy-mm-dd');
   ```
+   ![](./05.png)  
 (3).查询2017-1-1至2018-6-1的订单详情：
   ```sql
   select a.ORDER_ID,a.CUSTOMER_NAME,
@@ -203,13 +203,18 @@ SQL>CREATE TABLESPACE users02 DATAFILE
   a.ORDER_ID=b.order_id and
   a.order_date between to_date('2017-1-1','yyyy-mm-dd') and to_date('2018-6-1','yyyy-mm-dd');
   ```
-
+   ![](./08.png)  
+   
 ### 4.查看数据库的使用情况
-以下样例查看表空间的数据库文件，以及每个文件的磁盘占用情况。
-$ sqlplus system/123@pdborcl
-
+(1).查看表空间的数据库文件
+ $ sqlplus system/123@pdborcl
 ```sql
 SQL>SELECT tablespace_name,FILE_NAME,BYTES/1024/1024 MB,MAXBYTES/1024/1024 MAX_MB,autoextensible FROM dba_data_files  WHERE  tablespace_name='USERS';
+```
+   ![](./06.png)  
+   
+(2).查看每个文件的磁盘占用情况。
+```sql
 SQL>SELECT a.tablespace_name "表空间名",Total/1024/1024 "大小MB",
  free/1024/1024 "剩余MB",( total - free )/1024/1024 "使用MB",
  Round(( total - free )/ total,4)* 100 "使用率%"
@@ -219,13 +224,14 @@ SQL>SELECT a.tablespace_name "表空间名",Total/1024/1024 "大小MB",
         group  BY tablespace_name)b
  where  a.tablespace_name = b.tablespace_name;
 ```
+
 结果截图：  
-     ![](./6.png)    
+     ![](./07.png)    
      
 - autoextensible是显示表空间中的数据文件是否自动增加。
 - MAX_MB是指数据文件的最大容量。
 
 ## 四.实验总结
-通过本次实验，我学习到了经过这次实验，我学习到了如何在虚拟机上创建分区表的方法和插入相关数据的语法。明白了在创建分区
-表之前要先创建好分区存储位置，即分配分区存储空间。然后我还了解了如何在自己的用户下进行数据库和表的相关操作，比如运行sql文件等。
-最后还学会了怎么去查看数据库的使用情况。
+通过本次实验，我学习到了如何在虚拟机上创建分区表的方法和插入相关数据的语法。明白了在创建分区
+表之前要先创建好分区存储位置，即分配分区存储空间。然后我还了解了如何在自己的用户下进行数据库
+和表的相关操作，比如运行sql文件等。最后还学会了怎么去查看数据库的使用情况。
