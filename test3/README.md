@@ -17,7 +17,12 @@
 ## 三.实验步骤
 ### 1.在主表orders和从表order_details之间建立引用分区
 (1).首先创建自己的账号 new_xgh，然后以 system 身份登录:
-
+```sql
+ALTER USER new_xgh QUOTA UNLIMITED ON USERS;
+ALTER USER new_xgh QUOTA UNLIMITED ON USERS02;
+ALTER USER new_xgh QUOTA UNLIMITED ON USERS03;
+```
+ ![](./1.png)  
 
 
 
@@ -27,14 +32,8 @@
 [student@deep02 ~]$sqlplus zjf_201810513329/123@localhost/pdborcl
 SQL>@test3.sql
 SQL>exit
-
-
-
-
 ```
-
-
-   结果截图：  
+ 
      ![](./1.png)    
      ![](./2.png)
      ![](./3.png)
@@ -228,7 +227,7 @@ SQL>SELECT a.tablespace_name "表空间名",Total/1024/1024 "大小MB",
      
 - autoextensible是显示表空间中的数据文件是否自动增加。
 - MAX_MB是指数据文件的最大容量。
-- 
+
 ## 四.实验总结
 通过本次实验，我学习到了经过这次实验，我学习到了如何在虚拟机上创建分区表的方法和插入相关数据的语法。明白了在创建分区
 表之前要先创建好分区存储位置，即分配分区存储空间。然后我还了解了如何在自己的用户下进行数据库和表的相关操作，比如运行sql文件等。
