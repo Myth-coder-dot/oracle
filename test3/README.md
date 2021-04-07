@@ -22,7 +22,7 @@ ALTER USER new_xgh QUOTA UNLIMITED ON USERS;
 ALTER USER new_xgh QUOTA UNLIMITED ON USERS02;
 ALTER USER new_xgh QUOTA UNLIMITED ON USERS03;
 ```
- ![](./01.png)  
+  ![](./01.png)  
 
 
 
@@ -33,8 +33,9 @@ ALTER USER new_xgh QUOTA UNLIMITED ON USERS03;
 SQL>@test3.sql
 SQL>exit
 ```
-
-
+   ![](./02.png)  
+   ![](./03.png)  
+  
 
 ### 2.在表空间中创建两张表：
 (1).创建orders表代码如下：
