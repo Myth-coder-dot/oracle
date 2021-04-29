@@ -81,7 +81,7 @@
 |5|PRODUCT_NUM|NUMBER(8,2)|NO|产品销售数量，必须>0|
 |6|PRODUCT_PRICE|NUMBER(8,2)|NO|产品销售价格|
 
-- 数据关系图如下
+- 数据关系图如下:
     ![](./1.png)
 ### 2.以system身份登录并创建new_xgh角色并授权：
 ```sql
@@ -265,7 +265,8 @@
     (3)查询一个分区中的数据
     select count(*) from ORDERS partition(PARTITION_BEFORE_2016);  
 ```  
-![](.17.png)
+  ![](.17.png)
+  
 ## 五.实验总结
 通过本次实验，我学习到了解Oracle表和视图的概念，学习使用SQL语句Create Table创建表，学习Select语句插入，修改，删除以及查
 询数据，学习使用SQL语句创建视图，学习部分存储过程和触发器的使用。实验不难，只要跟着老师的调子走，就能顺利完成。感觉自己
