@@ -84,6 +84,7 @@
 - 数据关系图如下
     ![](./1.png)
 ### 2.以system身份登录并创建new_xgh角色并授权：
+```sql
      CREATE USER new_xgh IDENTIFIED BY 123
      DEFAULT TABLESPACE "USERS"
      TEMPORARY TABLESPACE "TEMP";
@@ -100,6 +101,7 @@
 
      -- SYSTEM PRIVILEGES
      GRANT CREATE VIEW TO new_xgh WITH ADMIN OPTION;
+```     
 ### 3.退出登录，查看实验四的脚本文件test4.sql:
     cat test4.sql
     
