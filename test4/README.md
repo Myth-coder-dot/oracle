@@ -110,6 +110,7 @@
     @test4.sql
     
 ### 5. 一切就绪，开始测试：
+```sql
      以下时间在0.02秒以内才正常：（id取值从1到20000000）
      select * from ORDERS where  order_id=1;
      select * from ORDER_DETAILS where  order_id=1;
@@ -189,7 +190,7 @@
      -rw-r----- 1 oracle root 2.5G 11月  1 14:53 /home/oracle/app/oracle/oradata/orcl/pdbtest/pdbtest_users02_2.dbf
      */   
     
-    
+```    
 ## 五.实验总结
 通过本次实验，我学习到了如何在虚拟机上创建分区表的方法和插入相关数据的语法。明白了在创建分区
 表之前要先创建好分区存储位置，即分配分区存储空间。然后我还了解了如何在自己的用户下进行数据库
