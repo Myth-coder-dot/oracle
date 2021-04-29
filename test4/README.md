@@ -190,6 +190,49 @@
      -rw-r----- 1 oracle root 2.5G 11月  1 14:53 /home/oracle/app/oracle/oradata/orcl/pdbtest/pdbtest_users02_2.dbf
      */   
     
+``` 
+### 6.查询数据
+```sql
+    (1)查询某个员工的信息
+    select * from EMPLOYEES where EMPLOYEE_ID = 1;
+    
+    (2).递归查询某个员工及其所有下属，子下属员工。
+    SELECT * FROM employees START WITH EMPLOYEE_ID = 11 CONNECT BY PRIOR EMPLOYEE_ID = MANAGER_ID;
+    
+    
+    SELECT employee_id, name, manager_id, level, CONNECT_BY_ISLEAF
+    FROM EMPLOYEES  START WITH employee_id = 12
+    CONNECT BY PRIOR employee_id = manager_id
+    order by level;
+  
+    (3)查询订单表，并且包括订单的订单应收货款: Trade_Receivable= sum(订单详单表.ProductNum*订单详单表.ProductPrice)- Discount。
+     select * from orders;
+     
+    (4)查询订单详表，要求显示订单的客户名称和客户电话，产品类型用汉字描述。
+     select o.customer_name,o.customer_tel,p.product_type as 产品类型
+     from orders o,order_details d,products p
+     where o.order_id=d.order_id 
+     and d.product_name=p.product_name;
+
+   
+    (5)查询出所有空订单，即没有订单详单的订单。
+    select * from orders
+    where order_id not in(select o.order_id from orders o, order_details d where order_id = d.order_id);
+    
+    (6)查询部门表，同时显示部门的负责人姓名。
+    select d.*, name
+    from departments d, employees e
+    where d.department_id = e.department_id and e.manager_id = d.department_id;
+
+    (7)查询部门表，统计每个部门的销售总金额。
+    select d.department_name, sum(sum1)
+    from(select (d.product_num*d.product_price) sum1
+    from order_details d, orders o, departments d, employees e
+    where d.department_id = e.department_id
+    and o.employee_id = e.employee_id and o.order_id=d.order_id), departments d
+    group by d.department_name;
+    
+    
 ```    
 ## 五.实验总结
 通过本次实验，我学习到了如何在虚拟机上创建分区表的方法和插入相关数据的语法。明白了在创建分区
