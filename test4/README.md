@@ -102,12 +102,14 @@
      -- SYSTEM PRIVILEGES
      GRANT CREATE VIEW TO new_xgh WITH ADMIN OPTION;
 ```     
+   ![](./2.png)
 ### 3.退出登录，查看实验四的脚本文件test4.sql:
     cat test4.sql
-    
+   ![](./3.png)
 ### 4.用自己的用户new_xgh登录,并运行脚本文件 test4.sql:
     sqlplus new_xgh/123@localhost/pdborcl
     @test4.sql
+   ![](./4.png)
     
 ### 5. 一切就绪，开始测试：
 ```sql
@@ -195,7 +197,7 @@
 ```sql
     (1)查询某个员工的信息
     select * from EMPLOYEES where EMPLOYEE_ID = 1;
-    
+  ![](./5.png)
     (2).递归查询某个员工及其所有下属，子下属员工。
     SELECT * FROM employees START WITH EMPLOYEE_ID = 11 CONNECT BY PRIOR EMPLOYEE_ID = MANAGER_ID;
     
