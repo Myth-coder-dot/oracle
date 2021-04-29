@@ -83,6 +83,23 @@
 
 - 数据关系图如下
     ![](./1.png)
+### 2.以system身份登录并创建new_xgh角色并授权：
+     CREATE USER new_yrf IDENTIFIED BY 123
+     DEFAULT TABLESPACE "USERS"
+     TEMPORARY TABLESPACE "TEMP";
+
+     -- QUOTAS
+     ALTER USER new_yrf QUOTA UNLIMITED ON USERS;
+     ALTER USER new_yrf QUOTA UNLIMITED ON USERS02;
+     ALTER USER new_yrf ACCOUNT UNLOCK;
+
+     -- ROLES
+     GRANT "CONNECT" TO new_yrf WITH ADMIN OPTION;
+     GRANT "RESOURCE" TO new_yrf WITH ADMIN OPTION;
+     ALTER USER new_yrf DEFAULT ROLE "CONNECT","RESOURCE";
+
+     -- SYSTEM PRIVILEGES
+     GRANT CREATE VIEW TO new_yrf WITH ADMIN OPTION;
 
 ## 五.实验总结
 通过本次实验，我学习到了如何在虚拟机上创建分区表的方法和插入相关数据的语法。明白了在创建分区
