@@ -130,7 +130,7 @@
 
      --特殊查询语句：
      --查询分区表情况:
-     select TABLE_NAME,PARTITION_NAME,HIGH_VALUE,PARTITION_POSITION,TABLESPACE_NAME from user_tab_partitions
+     select TABLE_NAME,PARTITION_NAME,HIGH_VALUE,PARTITION_POSITION,TABLESPACE_NAME from user_tab_partitions;
      --查询分区索引情况：
      select * from USER_IND_PARTITIONS;
 
@@ -214,7 +214,6 @@
      where o.order_id=d.order_id 
      and d.product_name=p.product_name;
 
-   
     (5)查询出所有空订单，即没有订单详单的订单。
     select * from orders
     where order_id not in(select o.order_id from orders o, order_details d where order_id = d.order_id);
@@ -232,12 +231,29 @@
     and o.employee_id = e.employee_id and o.order_id=d.order_id), departments d
     group by d.department_name;
     
+    (8)查询部门表，同时显示部门的负责人姓名：
+    select d.*, e.NAME 
+    from DEPARTMENTS d, EMPLOYEES e,(select  distinct manager_id, department_id from employees where manager_id is not null)t 
+    where d.department_id = t.department_id and e.employee_id = t.manager_id;
     
-```    
+    (9)查询经理信息：
+    SELECT * FROM EMPLOYEES WHERE NAME LIKE '%经理%';
+    
+    
+    
+``` 
+### 7.查看分区
+```sql
+    (1)查询分区表情况:
+    select TABLE_NAME,PARTITION_NAME,HIGH_VALUE,PARTITION_POSITION,TABLESPACE_NAME from user_tab_partitions;
+    (2)查询分区索引情况：
+    select * from USER_IND_PARTITIONS;
+    (3)查询一个分区中的数据
+    select count(*) from ORDERS partition(PARTITION_BEFORE_2016);
+    
+ ```   
 ## 五.实验总结
-通过本次实验，我学习到了如何在虚拟机上创建分区表的方法和插入相关数据的语法。明白了在创建分区
-表之前要先创建好分区存储位置，即分配分区存储空间。然后我还了解了如何在自己的用户下进行数据库
-和表的相关操作，比如运行sql文件等。最后还学会了自己建立两个表进行相关的查询语句操作包括查询
-数据条数和相关订单详情等等，感觉自己收获颇丰！总之要继续坚持学好Oracle数据库让自己变得懂得怎
-样去管理和操控数据，加油！
+通过本次实验，我学习到了解Oracle表和视图的概念，学习使用SQL语句Create Table创建表，学习Select语句插入，修改，删除以及查
+询数据，学习使用SQL语句创建视图，学习部分存储过程和触发器的使用。实验不难，只要跟着老师的调子走，就能顺利完成。感觉自己
+收获颇丰！总之要继续坚持学好Oracle数据库让自己变得懂得怎样去管理和操控数据，加油！
 
