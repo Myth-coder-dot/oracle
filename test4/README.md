@@ -84,23 +84,110 @@
 - 数据关系图如下
     ![](./1.png)
 ### 2.以system身份登录并创建new_xgh角色并授权：
-     CREATE USER new_yrf IDENTIFIED BY 123
+     CREATE USER new_xgh IDENTIFIED BY 123
      DEFAULT TABLESPACE "USERS"
      TEMPORARY TABLESPACE "TEMP";
 
      -- QUOTAS
-     ALTER USER new_yrf QUOTA UNLIMITED ON USERS;
-     ALTER USER new_yrf QUOTA UNLIMITED ON USERS02;
-     ALTER USER new_yrf ACCOUNT UNLOCK;
+     ALTER USER new_xgh QUOTA UNLIMITED ON USERS;
+     ALTER USER new_xgh QUOTA UNLIMITED ON USERS02;
+     ALTER USER new_xgh ACCOUNT UNLOCK;
 
      -- ROLES
-     GRANT "CONNECT" TO new_yrf WITH ADMIN OPTION;
-     GRANT "RESOURCE" TO new_yrf WITH ADMIN OPTION;
-     ALTER USER new_yrf DEFAULT ROLE "CONNECT","RESOURCE";
+     GRANT "CONNECT" TO new_xgh WITH ADMIN OPTION;
+     GRANT "RESOURCE" TO new_xgh WITH ADMIN OPTION;
+     ALTER USER new_xgh DEFAULT ROLE "CONNECT","RESOURCE";
 
      -- SYSTEM PRIVILEGES
-     GRANT CREATE VIEW TO new_yrf WITH ADMIN OPTION;
+     GRANT CREATE VIEW TO new_xgh WITH ADMIN OPTION;
+### 3.退出登录，查看实验四的脚本文件test4.sql:
+    cat test4.sql
+    
+### 4.用自己的用户new_xgh登录,并运行脚本文件 test4.sql:
+    sqlplus new_xgh/123@localhost/pdborcl
+    @test4.sql
+    
+### 5. 一切就绪，开始测试：
+     以下时间在0.02秒以内才正常：（id取值从1到20000000）
+     select * from ORDERS where  order_id=1;
+     select * from ORDER_DETAILS where  order_id=1;
+     select * from VIEW_ORDER_DETAILS where order_id=1;
 
+     --2.递归查询某个员工及其所有下属，子下属员工。
+     WITH A (EMPLOYEE_ID,NAME,EMAIL,PHONE_NUMBER,HIRE_DATE,SALARY,MANAGER_ID,DEPARTMENT_ID) AS
+       (SELECT EMPLOYEE_ID,NAME,EMAIL,PHONE_NUMBER,HIRE_DATE,SALARY,MANAGER_ID,DEPARTMENT_ID
+         FROM employees WHERE employee_ID = 11
+         UNION ALL
+       SELECT B.EMPLOYEE_ID,B.NAME,B.EMAIL,B.PHONE_NUMBER,B.HIRE_DATE,B.SALARY,B.MANAGER_ID,B.DEPARTMENT_ID
+         FROM A, employees B WHERE A.EMPLOYEE_ID = B.MANAGER_ID)
+     SELECT * FROM A;
+     --或者
+     SELECT * FROM employees START WITH EMPLOYEE_ID = 11 CONNECT BY PRIOR EMPLOYEE_ID = MANAGER_ID;
+
+
+     --特殊查询语句：
+     --查询分区表情况:
+     select TABLE_NAME,PARTITION_NAME,HIGH_VALUE,PARTITION_POSITION,TABLESPACE_NAME from user_tab_partitions
+     --查询分区索引情况：
+     select * from USER_IND_PARTITIONS;
+
+
+     --查询一个分区中的数据
+     select count(*) from ORDERS partition(PARTITION_BEFORE_2016);
+     select count(*) from ORDERS partition(PARTITION_BEFORE_2017);
+     --或者：
+     --select count(*) from ORDERS where order_date<to_date('2016-01-01','yyyy-mm-dd');
+
+     select count(*) from ORDER_DETAILS partition(PARTITION_BEFORE_2016);
+     select count(*) from ORDER_DETAILS partition(PARTITION_BEFORE_2017);
+
+     --收集表的统计信息dbms_stats.gather_table_stats
+     --也可以使用ANALYZE TABLE TableName COMPUTE STATISTICS; 但推荐使用dbms_stats.gather_table_stats
+     --分析单个表：
+     --exec dbms_stats.gather_table_stats(user,'ORDERS',cascade=>true); --cascade=true表示同时收集索引的信息
+     --exec dbms_stats.gather_table_stats(user,'ORDER_DETAILS',cascade=>true);
+     --统计用户的所有表：
+     exec dbms_stats.gather_schema_stats(User,estimate_percent=>100,cascade=> TRUE); --estimate_percent采样行的百分比
+
+     --统计完成后，查询表的统计信息：
+     select table_name,tablespace_name,num_rows from user_tables where table_name='ORDERS';
+     select table_name,tablespace_name,num_rows from user_tables where table_name='ORDER_DETAILS';
+
+
+     select * from orders where order_id=1300;
+     select * from ORDER_DETAILS where order_id=1300;
+     select * from orders where customer_name='zhang133000';
+     select * from orders where order_date<to_date('2016-01-01','yyyy-mm-dd');
+
+     --查看数据文件的使用情况
+     select * from dba_data_files;
+
+     --查看表空间的使用情况
+     SELECT a.tablespace_name "表空间名",
+     total "表空间大小",
+     free "表空间剩余大小",
+     (total - free) "表空间使用大小",
+     total / (1024 * 1024 * 1024) "表空间大小(G)",
+     free / (1024 * 1024 * 1024) "表空间剩余大小(G)",
+     (total - free) / (1024 * 1024 * 1024) "表空间使用大小(G)",
+     round((total - free) / total, 4) * 100 "使用率 %"
+     FROM (SELECT tablespace_name, SUM(bytes) free
+     FROM dba_free_space
+     GROUP BY tablespace_name) a,
+     (SELECT tablespace_name, SUM(bytes) total
+     FROM dba_data_files
+     GROUP BY tablespace_name) b
+     WHERE a.tablespace_name = b.tablespace_name
+
+     --查看数据文件大小:
+     [oracle@cdh3 ~]$ ls -lh /home/oracle/app/oracle/oradata/orcl/pdbtest/pdbtest_users*
+     -rw-r----- 1 oracle root 3.8G 11月  1 14:53 /home/oracle/app/oracle/oradata/orcl/pdbtest/pdbtest_users01_2.dbf
+     -rw-r----- 1 oracle root 2.4G 11月  1 14:53 /home/oracle/app/oracle/oradata/orcl/pdbtest/pdbtest_users01.dbf
+     -rw-r----- 1 oracle root 1.5G 11月  1 14:53 /home/oracle/app/oracle/oradata/orcl/pdbtest/pdbtest_users02_1.dbf
+     -rw-r----- 1 oracle root 2.5G 11月  1 14:53 /home/oracle/app/oracle/oradata/orcl/pdbtest/pdbtest_users02_2.dbf
+     */   
+    
+    
 ## 五.实验总结
 通过本次实验，我学习到了如何在虚拟机上创建分区表的方法和插入相关数据的语法。明白了在创建分区
 表之前要先创建好分区存储位置，即分配分区存储空间。然后我还了解了如何在自己的用户下进行数据库
