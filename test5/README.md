@@ -86,7 +86,8 @@ create or replace PROCEDURE GET_EMPLOYEES(V_EMPLOYEE_ID NUMBER)
         DBMS_OUTPUT.PUT_LINE(LPAD(LEFTSPACE,(V.LEVEL-1)*4,' ')||
                              V.EMPLOYEE_ID||' '||v.NAME);
       END LOOP;
-    END;
+     END;
+    EDN MyPack;
 ```
 ### 5.函数Get_SaleAmount()测试：
 ```sql
