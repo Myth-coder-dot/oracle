@@ -46,7 +46,13 @@ Oracle递归查询的语句格式是：
 ```
 ### 2.创建一个包(Package)，包名是MyPack。包中有：一个函数:Get_SaleAmount(V_DEPARTMENT_ID NUMBER)，一个过程:Get_Employees(V_EMPLOYEE_ID NUMBER)：
 ```sql
-    create or replace PACKAGE BODY MyPack IS;
+    /*
+    本实验以实验4为基础。
+    包MyPack中有：
+    一个函数:Get_SaleAmount(V_DEPARTMENT_ID NUMBER)，
+    一个过程:Get_Employees(V_EMPLOYEE_ID NUMBER)
+    */
+    create or replace PACKAGE BODY MyPack IS 
     FUNCTION Get_SaleAmount(V_DEPARTMENT_ID NUMBER) RETURN NUMBER;
         PROCEDURE Get_Employees(V_EMPLOYEE_ID NUMBER);
     END MyPack;
@@ -94,9 +100,7 @@ create or replace PROCEDURE GET_EMPLOYEES(V_EMPLOYEE_ID NUMBER)
 call MyPack.Get_Employees (1) ;  
 call MyPack.Get_Employees (11) ; 
     或者
-    set serveroutput on
-DECLARE
-  V_EMPLOYEE_ID NUMBER;    
+    set serveroutput on DECLARE V_EMPLOYEE_ID NUMBER;    
 BEGIN
   V_EMPLOYEE_ID := 1;
   MYPACK.Get_Employees (  V_EMPLOYEE_ID => V_EMPLOYEE_ID) ;  
