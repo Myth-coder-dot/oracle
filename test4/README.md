@@ -265,7 +265,7 @@
     (3)查询一个分区中的数据
     select count(*) from ORDERS partition(PARTITION_BEFORE_2016);  
 ```  
-  ![](.17.png)
+  ![](./17.png)
   
 ## 五.实验总结
 通过本次实验，我学习到了解Oracle表和视图的概念，学习使用SQL语句Create Table创建表，学习Select语句插入，修改，删除以及查
