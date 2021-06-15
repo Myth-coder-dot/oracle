@@ -87,11 +87,10 @@ GRANT xgh2 TO xgh_2;
 
 |   属性   |   字段   |   注解   |
 | :------: | :------: | :------: |
-|   编号   | ID NUMBER| 学生编号 |
-|   姓名   | PASSWORD   | 学生姓名 |
-| 班级编号 | class_id | 班级编号 |
-|   年龄   |   age    | 学生年龄 |
-|   性别   |   sex    | 学生性别 |
+|   编号   | ID NUMBER| 管理员编号 |
+|   姓名   | PASSWORD | 管理员姓名 |
+| 班级编号 |   ADMIN  | 管理编号 |
+
 
 
 ```sql
@@ -138,6 +137,18 @@ NOPARALLEL;
 - 根据注册日期按范围分区
 - 分为2018和2019年两个分区，每年按季度划4个子分区
 
+读者表
+
+|   属性   |    字段    |   注解   |
+| :------: | :--------: | :------: |
+|   编号   |   ID NUMBER  | 读者编号 |
+|   密码   |   PASSWORD   | 读者密码 |
+|   名字   |   USERNAME   | 读者姓名 |
+|   号码   |    PHONE    | 读者号码 |
+|   地址   |   ADDRESS   | 上课时间 |
+| 登记时间 |   REGISTRATIONDATE  | 时间 |
+| 推车编号 |   CART_ID NUMBER    | 编号 |
+
 ```sql
 CREATE TABLE BOOKUSER 
 (
@@ -180,7 +191,7 @@ PARTITION BY RANGE (REGISTRATIONDATE)
 SUBPARTITION BY RANGE (REGISTRATIONDATE) 
 (
   PARTITION DATE2018 VALUES LESS THAN (TO_DATE(' 2018-12-31 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
-  TABLESPACE SPACE_wmj001 
+  TABLESPACE SPACE_xgh001 
   PCTFREE 10 
   INITRANS 1 
   STORAGE 
@@ -222,6 +233,18 @@ SUBPARTITION BY RANGE (REGISTRATIONDATE)
 ![t7](t7.png)
 
 (3)创建商品表
+
+商品表
+
+|   属性   |    字段    |   注解   |
+| :------: | :--------: | :------: |
+|   编号   |   ID NUMBER    | 商品编号 |
+|   编号   |   PID NUMBER   | 购物卡密码 |
+|   名字   |   BOOKSNAME    | 商品名字 |
+|   价格   |   PRICE NUMBER | 商品价格号码 |
+|   描述   |   DESCRIBE   | 商品描述|
+|   编号   |   NUM NUMBE  | 序号 |
+| 管理编号 |   ADMIN_ID NUMBER | 管理编号 |
 
 ```sql
 CREATE TABLE COMMODITY 
@@ -271,6 +294,16 @@ NOPARALLEL;
 
 - 用户表字段BOOKUSER_ID为购物车表的外键
 - 购物车采用引用分区
+
+购物车表
+
+|   属性   |    字段    |   注解   |
+| :------: | :--------: | :------: |
+|   编号   |   ID NUMBER  | 购物车编号 |
+|   总额   |   AMOUNT NUMBER  | 商品总额 |
+|   名字   |   PID NUMBER     | 购物卡编号|
+|   编号   |   BOOKUSER_ID    | 读者编号 |
+
 
 ```sql
 CREATE TABLE CART 
@@ -820,51 +853,12 @@ Oracle的备份与恢复有三种标准的模式，大致分为两 大类，备�
 
 
 
+### 六.实现数据库整体的异地备份(容灾)
 
-
-
-
-课程信息表
-
-| 属性 |  字段  |   注解   |
-| :--: | :----: | :------: |
-| 编号 |   id   | 课程编号 |
-| 名称 |  name  | 课程姓名 |
-| 学分 | credit | 课程学分 |
-
-课表信息表
-
-|   属性   |    字段    |   注解   |
-| :------: | :--------: | :------: |
-|   编号   |     id     | 课表编号 |
-| 课程编号 | subject_id | 课程编号 |
-| 班级编号 |  class_id  | 班级编号 |
-| 教师编号 | teacher_id | 教师编号 |
-|   时间   |    time    | 上课时间 |
-
-班级信息表
-
-| 属性 | 字段 |   注解   |
-| :--: | :--: | :------: |
-| 编号 |  id  | 班级编号 |
-| 名称 | name | 班级名称 |
-
-教师信息表
-
-| 属性 |    字段     |     注解     |
-| :--: | :---------: | :----------: |
-| 编号 |     id      |   教师编号   |
-| 名称 |    name     |   教师姓名   |
-| 信息 | information | 教师信息介绍 |
-
-
-
-### 六taGuard实现数据库整体的异地备份
-
- Data Guard 是Oracle的集成化灾难恢复解决方案，该技术可以维护生产数据库一个或多个同步备份，由一个主数据库和多个备用数据库组成，并形成一个独立的、易于管理的数据保护方案。
+  Data Guard 是Oracle的集成化灾难恢复解决方案，该技术可以维护生产数据库一个或多个同步备份，由一个主数据库和多个备用数据库组成，并形成一个独立的、易于管理的数据保护方案。
 Data Guard 备用数据库可以与主系统位于相同的数据中心，也可以是在地理位置上分布较远的远程灾难备份中心。
 
-   Data Guard 的基本原理是，当某次事务处理对生产数据库中的数据做出更改时，Oracle 数据库将在一个联机重做日志 文件中记录此次更改。在DataGuard中可以配置写日志的这个过程，除了把日志记录到本地的联机日志文件和归档日志文件中，还可以通过网络，把日志信息发送的远程的备用数据库服务器上。这个备用日志文件写入过程可以是实时，同步的，以实现零数据丢失(最大保护模式);也可以是异步的，以减少对网络带宽的压力(最大可用性模式);或者是通过归档日志文件、一个日志文件的批量传输模式，以减少对生产系统的性能影响(最大性能模式)。当备份数据库接收到日志信息后，Data Guard 可以自动利用日志信息实现数据的同步。当主数据库打开并处于活动状态时，备用数据库可以执行恢复操作，如果主数据库出现了故障，备用数据库即可以被激活并接管生产数据库的工作。
+  Data Guard 的基本原理是，当某次事务处理对生产数据库中的数据做出更改时，Oracle 数据库将在一个联机重做日志 文件中记录此次更改。在DataGuard中可以配置写日志的这个过程，除了把日志记录到本地的联机日志文件和归档日志文件中，还可以通过网络，把日志信息发送的远程的备用数据库服务器上。这个备用日志文件写入过程可以是实时，同步的，以实现零数据丢失(最大保护模式);也可以是异步的，以减少对网络带宽的压力(最大可用性模式);或者是通过归档日志文件、一个日志文件的批量传输模式，以减少对生产系统的性能影响(最大性能模式)。当备份数据库接收到日志信息后，Data Guard 可以自动利用日志信息实现数据的同步。当主数据库打开并处于活动状态时，备用数据库可以执行恢复操作，如果主数据库出现了故障，备用数据库即可以被激活并接管生产数据库的工作。
 
   安装配置Data Guard的步骤如下:
 
@@ -882,249 +876,5 @@ Data Guard 备用数据库可以与主系统位于相同的数据中心，也可
 
 (8)启动归档到备用数据库。
 
-   四、Data Guard在我院HIS中的应用
-
-   (1)容灾备份: 我院在住院大楼的机房新建了-个异地备份机房，硬件采用一台IBM X3650服务器， 服务器上配置5块146G硬盘并做了RAID5,安装配置了Oracle 10g 和Data Guard. 保证了无论是硬盘或网络出现故障的情况下全院信息系统能正常运行。同时对于火灾、盗窃等非技术情况下的异地备份，提高了整体系统完全性。经过多次测试，主数据库和备份数据库之间能够在5分钟之类切换，基本上能保证系统的连续运行。
-
-   Data Guard作为Oracle免费推出的一个灾难恢复技术，利用Oracle 10g Data Guard而实现备用数据库操作的好处可以简单地总结为:它提供了灾难保护并防止数据丢失、维护主数据库的几个事务一致的副本、 防止灾难、数据损坏和用户错误、无需昂贵且复杂的HW/SW镜像。但是Data Guard也有以下缺点:不支持异构、不可跨平台、数据库版本需一致， 目标数据库出入rcovery状态不可用等，如果用户需要更高性能及可靠性可以购买第三方软件，例如DSG Real Synce等产品。
-
- 第一步：备库
-
-~~~
-mkdir -p /home/oracle/app/oracle/diag/orcl
-mkdir -p /home/oracle/app/oracle/oradata/stdorcl/
-mkdir -p /home/oracle/app/oracle/oradata/stdorcl/pdborcl
-mkdir -p /home/oracle/arch
-mkdir -p /home/oracle/rman
-mkdir -p /home/oracle/app/oracle/oradata/stdorcl/pdbseed/
-mkdir -p /home/oracle/app/oracle/oradata/stdorcl/pdb/
-
-//linux 命令，一行一行在终端运行
-//删除原有数据库:
-$sqlplus / as sysdba         //连数据库
-shutdown immediate;          //sql>
-startup mount exclusive restrict;      //sql>
-drop database;              //sql>
-exit;                    //sql>
-启动到nomount
-$sqlplus / as sysdba         //连数据库
-startup nomount             //sql>
-sql>
-//换到primary
-~~~
-
-<img src="images\20.png" alt="image-20191126204925927" style="zoom:50%;" />
-
-
-
-![](images\21.png)
-
-第二步：主库:
-
-~~~
-$sqlplus /  sysdba              //sql>
-select group#,thread#,members,status from v$log;          //sql>
-
-alter database add standby logfile  group 5 '/home/oracle/app/oracle/oradata/orcl/stdredo1.log' size 50m; //sql>
-alter database add standby logfile  group 6 '/home/oracle/app/oracle/oradata/orcl/stdredo2.log' size 50m; //sql>
-alter database add standby logfile  group 7 '/home/oracle/app/oracle/oradata/orcl/stdredo3.log' size 50m; //sql> 
-alter database add standby logfile  group 8 '/home/oracle/app/oracle/oradata/orcl/stdredo4.log' size 50m; //sql>
-~~~
-
-主库环境开启强制归档
-
-~~~
-ALTER DATABASE FORCE LOGGING;  //sql>
-
-alter system set LOG_ARCHIVE_CONFIG='DG_CONFIG=(orcl,stdorcl)' scope=both sid='*';         //sql>
-alter system set log_archive_dest_1='LOCATION=/home/oracle/arch VALID_FOR=(ALL_LOGFILES,ALL_ROLES) DB_UNIQUE_NAME=orcl' scope=spfile;
-alter system set LOG_ARCHIVE_DEST_2='SERVICE=stdorcl LGWR ASYNC  VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE) DB_UNIQUE_NAME=stdorcl' scope=both sid='*';
-alter system set fal_client='orcl' scope=both sid='*';    
-alter system set FAL_SERVER='stdorcl' scope=both sid='*';  
-alter system set standby_file_management=AUTO scope=both sid='*';
-alter system set DB_FILE_NAME_CONVERT='/home/oracle/app/oracle/oradata/stdorcl/','/home/oracle/app/oracle/oradata/orcl/' scope=spfile sid='*';  
-alter system set LOG_FILE_NAME_CONVERT='/home/oracle/app/oracle/oradata/stdorcl/','/home/oracle/app/oracle/oradata/orcl/' scope=spfile sid='*';
-alter system set log_archive_format='%t_%s_%r.arc' scope=spfile sid='*';
-alter system set remote_login_passwordfile='EXCLUSIVE' scope=spfile;
-alter system set PARALLEL_EXECUTION_MESSAGE_SIZE=8192 scope=spfile;
-
-exit;
-~~~
-
-
-编辑主库以及备库的/home/oracle/app/oracle/product/12.1.0/dbhome_1/network/admin/tnsnames.ora文件
-
-~~~
-$gedit /home/oracle/app/oracle/product/12.1.0/dbhome_1/network/admin/tnsnames.ora  //terminal
-
-ORCL =
-  (DESCRIPTION =
-    (ADDRESS_LIST =
-      (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.206.131)(PORT = 1521))  //**
-    )
-    (CONNECT_DATA =
-      (SERVER = DEDICATED)
-      (SERVICE_NAME = orcl)
-    )
-  )
-
-stdorcl =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.206.132)(PORT = 1521))  //**
-    (CONNECT_DATA =
-      (SERVER = DEDICATED)
-      (SID = orcl)
-    )
-  )
-
-  //ifconfig 查询ip后 测试两能否平ping通  只改ip地址   最后一个块被替换为以上两个块  记得保存（主+备）
-~~~
-
-在主库上生成备库的参数文件:
-
-~~~
-$sqlplus /  as sysdba   //如果没有出现sql>
-SQL>create pfile from spfile;
-生成/home/oracle/app/oracle/product/12.1.0/dbhome_1/dbs/initorcl.ora
-exit;
-~~~
-
-<img src="images\22.png" alt="image-20191126205058301" style="zoom:50%;" />
-
-将主库的参数文件，密码文件拷贝到备库:
-
-scp /home/oracle/app/oracle/product/12.1.0/dbhome_1/dbs/initorcl.ora 192.168.206.132:/home/oracle/app/oracle/product/12.1.0/dbhome_1/dbs/
-scp /home/oracle/app/oracle/product/12.1.0/dbhome_1/dbs/orapworcl 192.168.206.132:/home/oracle/app/oracle/product/12.1.0/dbhome_1/dbs/
-
-将主库复制到备库
-
-~~~
-$rman target sys/123@orcl auxiliary sys/123@stdorcl      //terminal运行
-rman>
-执行duplicate:
-run{ 
-allocate channel c1 type disk;
-allocate channel c2 type disk;
-allocate channel c3 type disk;
-allocate AUXILIARY channel c4 type disk;
-allocate AUXILIARY channel c5 type disk;
-allocate AUXILIARY channel c6 type disk;
-DUPLICATE TARGET DATABASE
-  FOR STANDBY
-  FROM ACTIVE DATABASE
-  DORECOVER
-  NOFILENAMECHECK;
-release channel c1;
-release channel c2;
-release channel c3;
-release channel c4;
-release channel c5;
-release channel c6;
-}
-~~~
-
-
-//等待直至出现rman>
-
-第三步：备库
-
-在备库上更改参数文件
-
-$gedit /home/oracle/app/oracle/product/12.1.0/dbhome_1/dbs/initorcl.ora  //运行
-
-文件内容是：
-
-~~~
-orcl.__data_transfer_cache_size=0
-orcl.__db_cache_size=671088640
-orcl.__java_pool_size=16777216
-orcl.__large_pool_size=33554432
-orcl.__oracle_base='/home/oracle/app/oracle'#ORACLE_BASE set from environment
-orcl.__pga_aggregate_target=536870912
-orcl.__sga_target=1258291200
-orcl.__shared_io_pool_size=50331648
-orcl.__shared_pool_size=301989888
-orcl.__streams_pool_size=0
-*._allow_resetlogs_corruption=TRUE
-*._catalog_foreign_restore=FALSE
-*.audit_file_dest='/home/oracle/app/oracle/admin/orcl/adump'
-*.audit_trail='db'
-*.compatible='12.1.0.2.0'
-*.control_files='/home/oracle/app/oracle/oradata/orcl/control01.ctl','/home/oracle/app/oracle/fast_recovery_area/orcl/control02.ctl','/home/oracle/app/oracle/fast_recovery_area/orcl/control03.ctl'
-*.db_block_size=8192
-*.db_domain=''
-*.db_file_name_convert='/home/oracle/app/oracle/oradata/orcl/','/home/oracle/app/oracle/oradata/stdorcl/'
-*.db_name='orcl'
-*.db_unique_name='stdorcl'
-*.db_recovery_file_dest='/home/oracle/app/oracle/fast_recovery_area'
-*.db_recovery_file_dest_size=4823449600
-*.diagnostic_dest='/home/oracle/app/oracle'
-*.dispatchers='(PROTOCOL=TCP)(dispatchers=1)(pool=on)(ticks=1)(connections=500)(sessions=1000)'
-*.enable_pluggable_database=true
-*.fal_client='stdorcl'
-*.fal_server='orcl'
-*.inmemory_max_populate_servers=2
-*.inmemory_size=157286400
-*.local_listener=''
-*.log_archive_config='DG_CONFIG=(stdorcl,orcl)'
-*.log_archive_dest_1='LOCATION=/home/oracle/arch VALID_FOR=(ALL_LOGFILES,ALL_ROLES) DB_UNIQUE_NAME=stdorcl'
-*.log_archive_dest_2='SERVICE=orcl LGWR ASYNC  VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE) DB_UNIQUE_NAME=orcl'
-*.log_archive_format='%t_%s_%r.arc'
-*.log_file_name_convert='/home/oracle/app/oracle/oradata/orcl/','/home/oracle/app/oracle/oradata/stdorcl/'
-*.max_dispatchers=5
-*.max_shared_servers=20
-*.open_cursors=400
-*.parallel_execution_message_size=8192
-*.pga_aggregate_target=511m
-*.processes=300
-*.recovery_parallelism=0
-*.remote_login_passwordfile='EXCLUSIVE'
-*.service_names='ORCL'
-*.sga_max_size=1572864000
-*.sga_target=1258291200
-*.shared_server_sessions=200
-*.standby_file_management='AUTO'
-*.undo_tablespace='UNDOTBS1'
-~~~
-
-//以上全部替换弹出的文件内容    记得保存
-
-<img src="images\23.png" alt="image-20191126205030287" style="zoom:50%;" />
-
-在备库增加静态监听
-
-~~~
-$gedit /home/oracle/app/oracle/product/12.1.0/dbhome_1/network/admin/listener.ora //运行
-
-SID_LIST_LISTENER =
-  (SID_LIST =
-    (SID_DESC =
-      (ORACLE_HOME = /home/oracle/app/oracle/product/12.1.0/db_1)
-      (SID_NAME = orcl)
-    )
-  )
- //添加到此文件最后 
-//重新启动,备库开启实时应用模式:：
-$sqlplus / as sysdba //再次连数据库
-shutdown immediate   //sql>
-startup              //sql>
-alter database recover managed standby database disconnect;        //sql>
-~~~
-
-测试：
-
-在主库连数据库
-
-~~~
-$sqlplus / as sysdba //连数据库
-create table lft(sex varchar);
-~~~
-
-进入备库：
-
-~~~
-$sqlplus / as sysdba //连数据库
-select * from lft;
-~~~
-
+ 
 
