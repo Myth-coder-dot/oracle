@@ -21,7 +21,8 @@ datafile
   SIZE 100M AUTOEXTEND ON NEXT 256M MAXSIZE UNLIMITED
 EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
 ```
-![t1](1.png)
+
+ ![i1](./1.png)
 
 - space_xgh002
 
@@ -35,7 +36,7 @@ datafile
 EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
 ```
 
-![t2](t2.png)
+ ![i2](./2.png)
 
 ### 2. 创建角色及用户
 用户默认使用表空间space_xgh001
@@ -57,8 +58,8 @@ ALTER USER xgh_1 QUOTA 60M ON space_xgh001;
 GRANT wmj1 TO xgh_1;
 ```
 
-![](./pic/2.png)
-![t3](t3.png)
+![i3](./3.png)
+
 
 ### 3.创建第二个角色和用户
 
@@ -77,7 +78,7 @@ ALTER USER xgh_2 QUOTA 60M ON space_xgh001;
 
 GRANT xgh2 TO xgh_2;
 ```
-![t4](t4.png)
+![i4](./4.png)
 
 ### 3. 在用户xgh_1下创建表
 
@@ -90,7 +91,6 @@ GRANT xgh2 TO xgh_2;
 |   编号   | ID NUMBER| 管理员编号 |
 |   姓名   | PASSWORD | 管理员姓名 |
 | 班级编号 |   ADMIN  | 管理编号 |
-
 
 
 ```sql
@@ -130,7 +130,7 @@ NOCOMPRESS
 NO INMEMORY 
 NOPARALLEL;
 ```
-
+  ![i5](./5.png)
 (2)创建用户表
 
 - id为主键
@@ -230,7 +230,7 @@ SUBPARTITION BY RANGE (REGISTRATIONDATE)
   )  
 );
 ```
-![t7](t7.png)
+![i6](./7.png)
 
 (3)创建商品表
 
@@ -287,7 +287,7 @@ NOCOMPRESS
 NO INMEMORY 
 NOPARALLEL;
 ```
-![t6](t6.png)
+![i7](./7.png)
 
 
 (4)创建购物车表
@@ -433,7 +433,7 @@ PARTITION BY REFERENCE (CART_BOOKUSER)
   NOCOMPRESS NO INMEMORY  
 );
 ```
-![t8](t8.png)
+![i8](./8.png)
 
 (5)论坛表
 
@@ -449,7 +449,7 @@ CREATE TABLE TABLE1
   ENABLE 
 );
 ```
-
+  ![i9](./9.png)
 ## 三. 数据库查询
 
 ## 1. 添加用户及权限管理
@@ -552,7 +552,7 @@ select b.id,b.username,co.booksname,(co.price*ca.amount) pricesum from COMMODITY
 select * from view_SinglePriceSum;
 ```
 
-![](t25.png)
+![](./10.png)
 
 **用户xgh_1空间不足，修改xgh_1空间大小**
 
@@ -608,7 +608,7 @@ begin
   end loop;
 end;
 ```
-![](t28.png)
+![](./11.png)
 
 ### 4.创建程序包、存储过程、函数执行分析计划（PL/SQL设计）
 
@@ -664,7 +664,7 @@ create or replace PACKAGE book_package Is
    procedure adduser(password varchar2,username varchar2,phone varchar2,address varchar2,registerdate VARCHAR2);
 end book_package;
 ```
-![](t30.png)
+  ![](./12.png)
 
 **创建函数、存储过程**
 
@@ -692,7 +692,7 @@ create or replace PACKAGE body book_package Is
             end adduser;
     end book_package;
 ```
-![](t31.png)
+![](./13.png)
 
 **存储过程、函数执行分析**
 使用自定义函数getcartsumprice（）查询id号为20011的用户购物车商品总价
@@ -701,7 +701,7 @@ create or replace PACKAGE body book_package Is
 select BOOK_PACKAGE.getcartsumprice(20011) from dual;
 ```
 
-![](t33.png)
+ ![](./14.png)
 
 使用存储过程adduser插入用户数据
 
@@ -713,7 +713,7 @@ BOOK_PACKAGE.addUser('131','cwd','125626','hongkong','2019-05-02');
 end;
 ```
 
-![t34](t34.png)
+![](./15.png)
 
 
 **执行计划分析**
@@ -723,7 +723,7 @@ select * from BOOKUSER b,COMMODITY co,CART ca where b.id=ca.BOOKUSER_ID and ca.P
 b.REGISTRATIONDATE between to_date('2018-1-1','yyyy-mm-dd') and to_date('2018-6-1','yyyy-mm-dd');
 ```
 
-![](t16.png)
+![](./17.png)
 
 ## 四.表空间使用状况
 
@@ -745,7 +745,7 @@ GROUP BY tablespace_name) b
 WHERE a.tablespace_name = b.tablespace_name
 ```
 
-![](t35.png)
+ ![](./18.png)
 
 ## 五.备份恢复
 
@@ -827,27 +827,25 @@ Oracle的备份与恢复有三种标准的模式，大致分为两 大类，备�
 
 - 备份./rman_level0.sh
 
-![](t18.png)
+![](./19.png)
 
 - 查看备份内容
 
-![](t19.png)
+![](./20.png)
 
-![](t20.png)
+![](./21.png)
 
 - 删除数据
 
-![](t21.png)
+![](./22.png)
 
 - 恢复备份
 
-![](t22.png)
-
-![](t23.png)
+![](./23.png)
 
 - 数据已恢复
 
-![](t24.png)
+![](./24.png)
 
 
 
