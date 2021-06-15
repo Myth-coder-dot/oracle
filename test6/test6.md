@@ -1,37 +1,434 @@
-# orcale数据库实验六-成都大学信息系统
-
-
+# orcale数据库实验六-成都大学图书管理信息系统
 
 <!-- [TOC] -->
 
 ## 一. 概述
 
-学生信息管理系统是学校管理的重要工具，是学校不可或缺的一部分。随着在校人数的不断增加，教务系统的数量也不断的上涨。学校工作繁杂，资料众多，人工管理信息的难度也越来越大，显然是不能满足实际的需要，效率也是很低的。并且这种传统的方式存在着众多的弊端，如：保密性差.查询不便.效率低，很难维护和更新等，然而，本系统针对以上的缺点能够极大的提高学生信息管理的效率，也是科学化.正规化的管理，与世界接轨的重要条件。所以如何自动高效地管理信息是这些年来许多人所研究的。
+成都大学图书管理系统是学校管理图书的重要工具，是学校不可或缺的一部分。随着在校人数的不断增加，系统的数量也不断的上涨。学校工作繁杂，资料众多，人工管理信息的难度也越来越大，显然是不能满足实际的需要，效率也是很低的。并且这种传统的方式存在着众多的弊端，如：保密性差.查询不便.效率低，很难维护和更新等，然而，本系统针对以上的缺点能够极大的提高图书信息管理的效率，也是科学化.正规化的管理，与世界接轨的重要条件。所以如何自动高效地管理信息是这些年来许多人所研究的。
 
-随着这些年电脑计算机的速度质的提高，成本的下降，IT互联网大众趋势的发展。我们使用电脑的高效率才处理数据信息成为可能。学生学籍管理系统的出现，正是管理人员与信息数据，计算机的进入互动时代的体现。友好的人机交互模式，清晰简明的图形界面，高效安全的操作使得我们对成千上万的的信息的管理得心入手。通过这个系统，可以做到信息的规范处理，科学统计和快速的查询，从而减少管理方面的工作量。毋庸置疑，切实有效的把计算机管理引入学校教务管理中，对于促进学校管理制度，提高学校教学质量与办学水平有着显著意义。
 
-## 二. 需求与功能分析 
+## 二.数据库以及表的创建
+### 1.创建表空间
 
-学生信息管理系统，可用于学校等机构的学生信息管理，查询，更新与维护，使用方便，易用性强。该系统实现的大致功能；用户登陆。提供了学生学籍信息的查询，添加，修改，删除；学生成绩的录入，修改，删除，查询班级排名，修改密码等功能。管理员管理拥有最高的权限。允许添加教师信息和课程信息等。其提供了简单.方便的操作。
+- space_xgh001
 
-## 三. 数据库设计
+```sql
+Create Tablespace space_xgh001
+datafile
+'/home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_xgh001_1.dbf'
+  SIZE 100M AUTOEXTEND ON NEXT 256M MAXSIZE UNLIMITED,
+'/home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_xgh001_2.dbf'
+  SIZE 100M AUTOEXTEND ON NEXT 256M MAXSIZE UNLIMITED
+EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
+```
+![t1](1.png)
+
+- space_xgh002
+
+```sql
+Create Tablespace space_xgh002
+datafile
+'/home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_xgh002_1.dbf'
+  SIZE 100M AUTOEXTEND ON NEXT 256M MAXSIZE UNLIMITED,
+'/home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_xgh002_2.dbf'
+  SIZE 100M AUTOEXTEND ON NEXT 256M MAXSIZE UNLIMITED
+EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
+```
+
+![t2](t2.png)
+
+### 2. 创建角色及用户
+用户默认使用表空间space_xgh001
+创建第一个角色和用户
+
+- 创建角色xgh1将connect,resource,create view授权给xgh1
+- 创建用户xgh_1
+- 分配60M空间给xgh_1并将角色xgh1授权给用户xgh_1
+
+```sql
+CREATE ROLE xgh1;
+
+GRANT connect,resource,CREATE VIEW TO xgh1;
+
+CREATE USER xgh_1 IDENTIFIED BY 123 DEFAULT TABLESPACE space_xgh001 TEMPORARY TABLESPACE temp;
+
+ALTER USER xgh_1 QUOTA 60M ON space_xgh001;
+
+GRANT wmj1 TO xgh_1;
+```
+
+![](./pic/2.png)
+![t3](t3.png)
+
+### 3.创建第二个角色和用户
+
+- 创建角色xgh2，将connect,resource权限给xgh2
+- 创建用户xgh_2
+- 分配60M空间给xgh_2并将角色wmj2授权给用户xgh_2
+
+```sql
+CREATE ROLE xgh2;
+
+GRANT connect,resource TO xgh2;
+
+CREATE USER xgh_2 IDENTIFIED BY 123 DEFAULT TABLESPACE space_xgh001 TEMPORARY TABLESPACE temp;
+
+ALTER USER xgh_2 QUOTA 60M ON space_xgh001;
+
+GRANT xgh2 TO xgh_2;
+```
+![t4](t4.png)
+
+### 3. 在用户xgh_1下创建表
+
+(1)创建管理员表
+- id为主键
+学生信息表
+
+|   属性   |   字段   |   注解   |
+| :------: | :------: | :------: |
+|   编号   | ID NUMBER| 学生编号 |
+|   姓名   | PASSWORD   | 学生姓名 |
+| 班级编号 | class_id | 班级编号 |
+|   年龄   |   age    | 学生年龄 |
+|   性别   |   sex    | 学生性别 |
+
+
+```sql
+CREATE TABLE ADMINISTRATOR 
+(
+  ID NUMBER(*, 0) NOT NULL 
+, PASSWORD VARCHAR2(20 BYTE) NOT NULL 
+, ADMIN VARCHAR2(20 BYTE) NOT NULL 
+, CONSTRAINT ADMINISTRATOR_PK PRIMARY KEY 
+  (
+    ID 
+  )
+  USING INDEX 
+  (
+      CREATE UNIQUE INDEX ADMINISTRATOR_PK ON ADMINISTRATOR (ID ASC) 
+      LOGGING 
+      TABLESPACE SPACE_xgh001 
+      PCTFREE 10 
+      INITRANS 2 
+      STORAGE 
+      ( 
+        BUFFER_POOL DEFAULT 
+      ) 
+      NOPARALLEL 
+  )
+  ENABLE 
+) 
+LOGGING 
+TABLESPACE SPACE_wmj001 
+PCTFREE 10 
+INITRANS 1 
+STORAGE 
+( 
+  BUFFER_POOL DEFAULT 
+) 
+NOCOMPRESS 
+NO INMEMORY 
+NOPARALLEL;
+```
+
+(2)创建用户表
+
+- id为主键
+- 根据注册日期按范围分区
+- 分为2018和2019年两个分区，每年按季度划4个子分区
+
+```sql
+CREATE TABLE BOOKUSER 
+(
+  ID NUMBER(*, 0) NOT NULL 
+, PASSWORD VARCHAR2(20 BYTE) NOT NULL 
+, USERNAME VARCHAR2(50 BYTE) NOT NULL 
+, PHONE VARCHAR2(20 BYTE) NOT NULL 
+, ADDRESS VARCHAR2(30 BYTE) NOT NULL 
+, REGISTRATIONDATE DATE NOT NULL 
+, CART_ID NUMBER(*, 0) NOT NULL 
+, CONSTRAINT U_PK PRIMARY KEY 
+  (
+    ID 
+  )
+  USING INDEX 
+  (
+      CREATE UNIQUE INDEX U_PK ON BOOKUSER (ID ASC) 
+      LOGGING 
+      TABLESPACE SPACE_xgh001 
+      PCTFREE 10 
+      INITRANS 2 
+      STORAGE 
+      ( 
+        BUFFER_POOL DEFAULT 
+      ) 
+      NOPARALLEL 
+  )
+  ENABLE 
+) 
+TABLESPACE SPACE_xgh001 
+PCTFREE 10 
+INITRANS 1 
+STORAGE 
+( 
+  BUFFER_POOL DEFAULT 
+) 
+NOCOMPRESS 
+NOPARALLEL 
+PARTITION BY RANGE (REGISTRATIONDATE) 
+SUBPARTITION BY RANGE (REGISTRATIONDATE) 
+(
+  PARTITION DATE2018 VALUES LESS THAN (TO_DATE(' 2018-12-31 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
+  TABLESPACE SPACE_wmj001 
+  PCTFREE 10 
+  INITRANS 1 
+  STORAGE 
+  ( 
+    BUFFER_POOL DEFAULT 
+  ) 
+  NOCOMPRESS NO INMEMORY 
+  (
+    SUBPARTITION DATE2018_3 VALUES LESS THAN (TO_DATE(' 2018-03-31 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
+    NOCOMPRESS NO INMEMORY  
+  , SUBPARTITION DATE2018_6 VALUES LESS THAN (TO_DATE(' 2018-06-30 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
+    NOCOMPRESS NO INMEMORY  
+  , SUBPARTITION DATE2018_9 VALUES LESS THAN (TO_DATE(' 2018-09-30 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
+    NOCOMPRESS NO INMEMORY  
+  , SUBPARTITION DATE2018_12 VALUES LESS THAN (TO_DATE(' 2018-12-31 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
+    NOCOMPRESS NO INMEMORY  
+  )  
+, PARTITION DATE2019 VALUES LESS THAN (TO_DATE(' 2019-12-31 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
+  TABLESPACE SPACE_xgh001 
+  PCTFREE 10 
+  INITRANS 1 
+  STORAGE 
+  ( 
+    BUFFER_POOL DEFAULT 
+  ) 
+  NOCOMPRESS NO INMEMORY 
+  (
+    SUBPARTITION DATE2019_3 VALUES LESS THAN (TO_DATE(' 2019-03-31 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
+    NOCOMPRESS NO INMEMORY  
+  , SUBPARTITION DATE2019_6 VALUES LESS THAN (TO_DATE(' 2019-06-30 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
+    NOCOMPRESS NO INMEMORY  
+  , SUBPARTITION DATE2019_9 VALUES LESS THAN (TO_DATE(' 2019-09-30 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
+    NOCOMPRESS NO INMEMORY  
+  , SUBPARTITION DATE2019_12 VALUES LESS THAN (TO_DATE(' 2019-12-31 00:00:00', 'SYYYY-MM-DD HH24:MI:SS', 'NLS_CALENDAR=GREGORIAN')) 
+    NOCOMPRESS NO INMEMORY  
+  )  
+);
+```
+![t7](t7.png)
+
+(3)创建商品表
+
+```sql
+CREATE TABLE COMMODITY 
+(
+  ID NUMBER(*, 0) NOT NULL 
+, PID NUMBER(*, 0) NOT NULL 
+, BOOKSNAME VARCHAR2(20 BYTE) NOT NULL 
+, PRICE NUMBER NOT NULL 
+, DESCRIBE VARCHAR2(50 BYTE) NOT NULL 
+, NUM NUMBER(*, 0) NOT NULL 
+, ADMIN_ID NUMBER(*, 0) NOT NULL 
+, CONSTRAINT COMMODITY_PK PRIMARY KEY 
+  (
+    ID 
+  )
+  USING INDEX 
+  (
+      CREATE UNIQUE INDEX COMMODITY_PK ON COMMODITY (ID ASC) 
+      LOGGING 
+      TABLESPACE SPACE_xgh001 
+      PCTFREE 10 
+      INITRANS 2 
+      STORAGE 
+      ( 
+        BUFFER_POOL DEFAULT 
+      ) 
+      NOPARALLEL 
+  )
+  ENABLE 
+) 
+LOGGING 
+TABLESPACE SPACE_xgh001 
+PCTFREE 10 
+INITRANS 1 
+STORAGE 
+( 
+  BUFFER_POOL DEFAULT 
+) 
+NOCOMPRESS 
+NO INMEMORY 
+NOPARALLEL;
+```
+![t6](t6.png)
+
+
+(4)创建购物车表
+
+- 用户表字段BOOKUSER_ID为购物车表的外键
+- 购物车采用引用分区
+
+```sql
+CREATE TABLE CART 
+(
+  ID NUMBER(*, 0) NOT NULL 
+, AMOUNT NUMBER(*, 0) NOT NULL 
+, PID NUMBER(*, 0) NOT NULL 
+, BOOKUSER_ID NUMBER(*, 0) NOT NULL 
+, CONSTRAINT CART_PK PRIMARY KEY 
+  (
+    ID 
+  )
+  USING INDEX 
+  (
+      CREATE UNIQUE INDEX CART_PK ON CART (ID ASC) 
+      LOGGING 
+      TABLESPACE SPACE_xgh001 
+      PCTFREE 10 
+      INITRANS 2 
+      STORAGE 
+      ( 
+        BUFFER_POOL DEFAULT 
+      ) 
+      NOPARALLEL 
+  )
+  ENABLE 
+, CONSTRAINT CART_BOOKUSER FOREIGN KEY
+  (
+  BOOKUSER_ID 
+  )
+  REFERENCES BOOKUSER
+  (
+  CART_ID 
+  )
+  ENABLE 
+) 
+PCTFREE 10 
+PCTUSED 40 
+INITRANS 1 
+STORAGE 
+( 
+  BUFFER_POOL DEFAULT 
+) 
+NOCOMPRESS 
+NOPARALLEL 
+PARTITION BY REFERENCE (CART_BOOKUSER) 
+(
+  PARTITION DATE2018_3 
+  LOGGING 
+  TABLESPACE SPACE_xgh001 
+  PCTFREE 10 
+  INITRANS 1 
+  STORAGE 
+  ( 
+    BUFFER_POOL DEFAULT 
+  ) 
+  NOCOMPRESS NO INMEMORY  
+, PARTITION DATE2018_6 
+  LOGGING 
+  TABLESPACE SPACE_xgh001 
+  PCTFREE 10 
+  INITRANS 1 
+  STORAGE 
+  ( 
+    BUFFER_POOL DEFAULT 
+  ) 
+  NOCOMPRESS NO INMEMORY  
+, PARTITION DATE2018_9 
+  LOGGING 
+  TABLESPACE SPACE_xgh001 
+  PCTFREE 10 
+  INITRANS 1 
+  STORAGE 
+  ( 
+    BUFFER_POOL DEFAULT 
+  ) 
+  NOCOMPRESS NO INMEMORY  
+, PARTITION DATE2018_12 
+  LOGGING 
+  TABLESPACE SPACE_xgh001 
+  PCTFREE 10 
+  INITRANS 1 
+  STORAGE 
+  ( 
+    BUFFER_POOL DEFAULT 
+  ) 
+  NOCOMPRESS NO INMEMORY  
+, PARTITION DATE2019_3 
+  LOGGING 
+  TABLESPACE SPACE_wmj001 
+  PCTFREE 10 
+  INITRANS 1 
+  STORAGE 
+  ( 
+    BUFFER_POOL DEFAULT 
+  ) 
+  NOCOMPRESS NO INMEMORY  
+, PARTITION DATE2019_6 
+  LOGGING 
+  TABLESPACE SPACE_xgh001 
+  PCTFREE 10 
+  INITRANS 1 
+  STORAGE 
+  ( 
+    BUFFER_POOL DEFAULT 
+  ) 
+  NOCOMPRESS NO INMEMORY  
+, PARTITION DATE2019_9 
+  LOGGING 
+  TABLESPACE SPACE_xgh001 
+  PCTFREE 10 
+  INITRANS 1 
+  STORAGE 
+  ( 
+    BUFFER_POOL DEFAULT 
+  ) 
+  NOCOMPRESS NO INMEMORY  
+, PARTITION DATE2019_12 
+  LOGGING 
+  TABLESPACE SPACE_xgh001 
+  PCTFREE 10 
+  INITRANS 1 
+  STORAGE 
+  ( 
+    BUFFER_POOL DEFAULT 
+  ) 
+  NOCOMPRESS NO INMEMORY  
+);
+```
+![t8](t8.png)
+
+(5)论坛表
+
+```sql
+CREATE TABLE TABLE1 
+(
+  ID INT NOT NULL 
+, CONTENT NVARCHAR2(50) NOT NULL 
+, CONSTRAINT TABLE1_PK PRIMARY KEY 
+  (
+    ID 
+  )
+  ENABLE 
+);
+```
+
+## 三. 数据库查询
 
 ## 1. 添加用户及权限管理
-
 oracle中的表就是一张存储数据的表。表空间是逻辑上的划分。方便管理的。
-
 数据表空间 (Tablespace) 
-
 存放数据总是需要空间， Oracle把一个数据库按功能划分若干空间来保存数据。当然数据存放在磁盘最终是以文件形式，所以一盘一个数据表空间包含一个以上的物理文件
 数据表。
-
 在仓库，我们可能有多间房子，每个房子又有多个货架，每架又有多层。 我们在数据库中存放数据，最终是数据表的单元来存储与管理的。
 数据文件。
-
 以上几个概念都是逻辑上的， 而数据文件则是物理上的。就是说，数据文件是真正“看得着的东西”，它在磁盘上以一个真实的文件体现。
 
 创建表空间：
-
 ~~~
 格式: create tablespace 表间名 datafile '数据文件名' size 表空间大小
                 create tablespace data_test datafile 'e:\oracle\oradata\test\data_1.dbf' size 2000M;
@@ -70,156 +467,33 @@ grant create session to cici;
 创建数据表
 
 在上面，我们已建好了用户 study 我们现在进入该用户 
-
 sqlplusw study/study@test   然后就可以在用户study中创建数据表了
-
 格式: create table 数据表名 
 
-###  创建student角色，并创建student_lft用户，并且给用户分配角色空间
+(1)分别创建两个用户xgh_user1和xgh_user2,并允许他们是使用xgh_space1表空间
+create user xgh_user1 IDENTIFIED by 123;
+create user xgh_user2 IDENTIFIED by 123;
+alter user xgh_user1 quota unlimited on space_xgh001 ;
+alter user xgh_user2 quota unlimited on space_xgh001;
 
-~~~sql
-CREATE ROLE student;
-GRANT connect,resource,CREATE VIEW TO student;
-CREATE USER user_lft IDENTIFIED BY 123 DEFAULT TABLESPACE users TEMPORARY TABLESPACE temp;
-ALTER USER user_lft QUOTA 50M ON users;
-GRANT student TO user_lft;
-exit
-~~~
-
-​	创建结果
-
-<img src="images\1.png" style="zoom:50%;" />
-
-## 2. 通过新创建的用户student_lft连接到 pdborcl 
-
-<img src="images/2.png" style="zoom:50%;" />
-
-## 3. 创建teacher角色并创建teacher_lft用户
-
-~~~sql
-CREATE ROLE teacher;
-CREATE USER teacher_lft IDENTIFIED BY 123 DEFAULT TABLESPACE users TEMPORARY TABLESPACE temp;
-GRANT teacher TO teacher_lft;
-~~~
-
-创建结果
-
-<img src="images/3.png" style="zoom:50%;" />
-
-## 4. 利用新创建的用户student_lft创建了五个表
-
-~~~sql
-  CREATE TABLE "STUDENT_LFT"."CLASS" 
-   (	"ID" NUMBER, 
-	"NAME" VARCHAR2(50 BYTE)
-   ) SEGMENT CREATION DEFERRED 
-  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
- NOCOMPRESS LOGGING
-  TABLESPACE "USERS" ;
+(2)创建两个角色xgh_role1，xgh_role2，并分别赋予xgh_role1，xgh_role2读任何表和读、修改任何表的权利
+create role xgh_role1;
+create role xgh_role2;
+grant select any table to xgh_role1;
+grant select any table to xgh_role2;
+grant update any table to xgh_role2;
 
 
-  CREATE TABLE "STUDENT_LFT"."CURRICULUM" 
-   (	"ID" NUMBER, 
-	"SUBJECT_ID" NUMBER, 
-	"CLASS_ID" NUMBER, 
-	"TEACHER_ID" NUMBER, 
-	"TIME" DATE
-   ) SEGMENT CREATION DEFERRED 
-  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
- NOCOMPRESS LOGGING
-  TABLESPACE "USERS" ;
-  
-  CREATE TABLE "STUDENT_LFT"."MYCLASS" 
-   (	"ID" NUMBER, 
-	"NAME" VARCHAR2(50 BYTE)
-   ) SEGMENT CREATION DEFERRED 
-  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
- NOCOMPRESS LOGGING
-  TABLESPACE "USERS" ;
-  
-  CREATE TABLE "STUDENT_LFT"."STUDENT" 
-   (	"ID" NUMBER, 
-	"NAME" VARCHAR2(50 BYTE), 
-	"CLASS_ID" NUMBER, 
-	"AGE" NUMBER(*,0), 
-	"SEX" VARCHAR2(50 BYTE)
-   ) SEGMENT CREATION DEFERRED 
-  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
- NOCOMPRESS LOGGING
-  TABLESPACE "USERS" ;
-  
-  CREATE TABLE "STUDENT_LFT"."SUBJECT" 
-   (	"ID" NUMBER, 
-	"NAME" VARCHAR2(50 BYTE), 
-	"CREDIT" NUMBER(*,0)
-   ) SEGMENT CREATION DEFERRED 
-  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
- NOCOMPRESS LOGGING
-  TABLESPACE "USERS" ;
+(3)将xgh_role1，xgh_role2分别赋予给用户xgh_user1，xgh_user2
+grant xgh_role1 to xgh_user1;
+grant xgh_role2 to xgh_user2;
 
-  CREATE TABLE "STUDENT_LFT"."TEACHER" 
-   (	"ID" NUMBER, 
-	"NAME" VARCHAR2(50 BYTE), 
-	"INFORMATION" VARCHAR2(50 BYTE)
-   ) SEGMENT CREATION DEFERRED 
-  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
- NOCOMPRESS LOGGING
-  TABLESPACE "USERS" ;
-~~~
-
-学生信息表
-
-|   属性   |   字段   |   注解   |
-| :------: | :------: | :------: |
-|   编号   |    id    | 学生编号 |
-|   姓名   |   name   | 学生姓名 |
-| 班级编号 | class_id | 班级编号 |
-|   年龄   |   age    | 学生年龄 |
-|   性别   |   sex    | 学生性别 |
-
-课程信息表
-
-| 属性 |  字段  |   注解   |
-| :--: | :----: | :------: |
-| 编号 |   id   | 课程编号 |
-| 名称 |  name  | 课程姓名 |
-| 学分 | credit | 课程学分 |
-
-课表信息表
-
-|   属性   |    字段    |   注解   |
-| :------: | :--------: | :------: |
-|   编号   |     id     | 课表编号 |
-| 课程编号 | subject_id | 课程编号 |
-| 班级编号 |  class_id  | 班级编号 |
-| 教师编号 | teacher_id | 教师编号 |
-|   时间   |    time    | 上课时间 |
-
-班级信息表
-
-| 属性 | 字段 |   注解   |
-| :--: | :--: | :------: |
-| 编号 |  id  | 班级编号 |
-| 名称 | name | 班级名称 |
-
-教师信息表
-
-| 属性 |    字段     |     注解     |
-| :--: | :---------: | :----------: |
-| 编号 |     id      |   教师编号   |
-| 名称 |    name     |   教师姓名   |
-| 信息 | information | 教师信息介绍 |
-
-## 6. 创建视图
+## 2.创建视图计算每个用户购车中单个商品的总价
 
 - 视图(view)，也称虚表, 不占用物理空间，这个也是相对概念，因为视图本身的定义语句还是要存储在数据字典里的。视图只有逻辑定义。每次使用的时候,只是重新执行SQL。
-
 - 视图是从一个或多个实际表中获得的，这些表的数据存放在数据库中。那些用于产生视图的表叫做该视图的基表。一个视图也可以从另一个视图中产生。
-
 - 视图的定义存在数据库中，与此定义相关的数据并没有再存一份于数据库中。通过视图看到的数据存放在基表中。
-
 - 视图看上去非常象数据库的物理表，对它的操作同任何其它的表一样。当通过视图修改数据时，实际上是在改变基表中的数据；相反地，基表数据的改变也会自动反映在由基表产生的视图中。由于逻辑上的原因，有些Oracle视图可以修改对应的基表，有些则不能（仅仅能查询）。
-
 - 还有一种视图：物化视图（MATERIALIZED VIEW ），也称实体化视图，快照 （8i 以前的说法） ，它是含有数据的，占用存储空间。
 
 ~~~sql
@@ -238,162 +512,72 @@ CREATE OR REPLACE FORCE EDITIONABLE VIEW "STUDENT_LFT"."MYVIEW_STUDENT" ("ID") A
   CREATE OR REPLACE FORCE EDITIONABLE VIEW "STUDENT_LFT"."MYVIEW_TEACHER" ("ID") AS 
   SELECT name FROM teacher;
 ~~~
+```sql
+create or replace  view view_SinglePriceSum
+as 
+select b.id,b.username,co.booksname,(co.price*ca.amount) pricesum from COMMODITY co,cart ca,BOOKUSER b where co.pid=ca.pid and ca.BOOKUSER_ID =b.id;
+select * from view_SinglePriceSum;
+```
 
-## 7. 将五个表的视图的SELECT对象权限授予teacher用户 
+![](t25.png)
 
-~~~sql
-GRANT SELECT ON myview_MYCLASS TO teacher_lft;
-GRANT SELECT ON myview_SURRICULUM TO teacher_lft;
-GRANT SELECT ON myview_STUDENT TO teacher_lft;
-GRANT SELECT ON myview_SUBJECT TO teacher_lft;
-GRANT SELECT ON myview_TEACHER TO teacher_lft;
-~~~
+**用户xgh_1空间不足，修改xgh_1空间大小**
 
-## 8. 向数据库中写入数据共计50000多个数据
+```sql
+ALTER USER wmj_1 QUOTA 90M ON space_xgh001;
+```
 
-### 8.1 班级表
-
-~~~sql
--- 班级表
-DECLARE
-    maxnumber   CONSTANT NUMBER := 100;
-    i           NUMBER := 1;
-BEGIN
-    FOR i IN 1..maxnumber LOOP
-        INSERT INTO myclass ( id,name ) VALUES (
-            i,
-            concat('class_',i)
-        ); --CONCAT('test',i)是将test与i进行拼接
-    END LOOP;
-
-    dbms_output.put_line(' 成功录入数据！ ');
-    COMMIT;
-END;
-
-
-~~~
-
-<img src="images/4.png" style="zoom:50%;" />
-
-### 8.2 教师表
-
-~~~sql
---教师表
-DECLARE
-    maxnumber   CONSTANT NUMBER := 100;
-    i           NUMBER := 1;
-BEGIN
-    FOR i IN 1..maxnumber LOOP
-        INSERT INTO teacher ( id,name,information ) VALUES (
-            i,
-            concat('name1_',i),
-            concat('information1_',i)
-        ); --CONCAT('test',i)是将test与i进行拼接
-
-    END LOOP;
-
-    dbms_output.put_line(' 成功录入数据！ ');
-    COMMIT;
-END;
-
-
-
-
-~~~
-
-<img src="images/7.png" style="zoom:50%;" />
-
-### 8.3 学科表
-
-~~~sql
--- 学科表
-DECLARE
-    maxnumber   CONSTANT NUMBER := 100;
-    i           NUMBER := 1;
-BEGIN
-    FOR i IN 1..maxnumber LOOP
-        INSERT INTO subject ( id,name,credit ) VALUES (
-            i,
-            concat('subject_name_',i),
-            4
-        ); --CONCAT('test',i)是将test与i进行拼接
-
-    END LOOP;
-
-    dbms_output.put_line(' 成功录入数据！ ');
-    COMMIT;
-END;
-
-~~~
-
-<img src="images/6.png" style="zoom:50%;" />
-
-### 8.4 课程表
-
-~~~sql
---课程表
-DECLARE
-    maxnumber   CONSTANT NUMBER := 1000;
-    i           NUMBER := 1;
-    my_subject_id NUMBER := 1;
-    my_class_id NUMBER := 1;
-    my_teacher_id NUMBER := 1;
-BEGIN
-    FOR i IN 1..maxnumber LOOP
-    if mod(i,10)=0 then my_class_id:=my_class_id+1;
+### 3. 插入用户、商品、购物车数据(向数据库中写入数据共计50000多个数据)
+```sql
+declare
+  id number(38,0);
+  username varchar2(50);
+  phone varchar2(20);
+  address varchar2(30);
+  REGISTRATIONDATE date;
+  booksname varchar2(50);
+  price number(5,2);
+  num number(38,0);
+  amount number(38,0);
+  
+begin
+  for i in 1..50000
+  loop
+    if i mod 2 =0 then
+      REGISTRATIONDATE:=to_date('2018-5-6','yyyy-mm-dd')+(i mod 60);
+    else
+      REGISTRATIONDATE:=to_date('2019-5-6','yyyy-mm-dd')+(i mod 60);
     end if;
-    if mod(i,10)=0 then my_subject_id:=my_subject_id+1;
-    end if;
-    if mod(i,10)=0 then my_teacher_id:=my_teacher_id+1;
-    end if;
-        INSERT INTO curriculum ( id,subject_id,class_id,teacher_id ) VALUES (
-            i,
-            my_subject_id,
-            my_class_id,
-            my_teacher_id
-        ); --CONCAT('test',i)是将test与i进行拼接
 
-    END LOOP;
-    
-    dbms_output.put_line(' 成功录入数据！ ');
-    COMMIT;
-END;
+    --插入用户
+    id:=SEQ_ORDER_ID.nextval; --应该将SEQ_ORDER_ID.nextval保存到变量中。
+    username := 'aa'|| 'aa';
+    username := 'wang' || i;
+    phone := '131785693' || i;
+	booksname := '十万个为什么' || i;
+	address :='云南'|| '昆明';
+	price :=(dbms_random.value() * 100);
+	num :=(i mod 5);
+    insert /*+append*/ into bookuser (id,password,username,phone,address,REGISTRATIONDATE,cart_id)
+      values (id,username,username,phone,address,REGISTRATIONDATE,id);
+	--插入货品
+		
+	insert into commodity(id,pid,booksname,price,describe,num,admin_id)
+		values (id,id,booksname,price,'good',num,1);
+	--插入购物车
+	amount :=(id mod 3 ) + 1;
+	insert into cart(id,amount,pid,bookuser_id)
+	 	values (id,amount,id,id);
 
+    IF I MOD 1000 =0 THEN
+      commit; --每次提交会加快插入数据的速度
+    END IF;
+  end loop;
+end;
+```
+![](t28.png)
 
-~~~
-
-<img src="images/8.png" style="zoom:50%;" />
-
-### 8.5 学生表
-
-~~~sql
---学生表
-DECLARE
-    maxnumber   CONSTANT NUMBER := 50000;
-    i           NUMBER := 1;
-    my_class_id NUMBER := 1;
-BEGIN
-    FOR i IN 1..maxnumber LOOP
-    if mod(i,500)=0 then my_class_id:=my_class_id+1;
-    end if;
-        INSERT INTO student ( id,name,class_id,age,sex ) VALUES (
-            i,
-            concat('student_name_',i),
-            my_class_id,
-            20,
-            'man'
-        ); --CONCAT('test',i)是将test与i进行拼接
-
-    END LOOP;
-
-    dbms_output.put_line(' 成功录入数据！ ');
-    COMMIT;
-END;
-~~~
-
-<img src="images/5.png" style="zoom:50%;" />
-
-## 9. PL/SQL设计
+### 4.创建程序包、存储过程、函数执行分析计划（PL/SQL设计）
 
  过程和函数由以下4部分： 
 
@@ -431,139 +615,108 @@ begin    show_line(50,'=');end;/
 ```sql
 SQL> BEGIN2        show_line(50,'=');3    END;
 ```
-
- 几点说明：
-
+几点说明：
 1、参数没有指定长度，当有实际数据传递进来的时候，参数的长度才被确定。
-
 2、局部声明为：actual_line varchar2(150);
-
 3、使用命令SQL> show errors在SQLPLUS里面查看错误。
 
-### 9.1 存储过程：
+**创建程序包**
 
-#### 9.1.1 查询班级人数
+- 函数getcartsumprice计算每个用户的购物车商品总金额
+- 存储过程adduser插入用户信息
 
-~~~sql
-create or replace PACKAGE MyPack IS
+```sql
+create or replace PACKAGE book_package Is
+   function getcartsumprice(user_id number) return number;
+   procedure adduser(password varchar2,username varchar2,phone varchar2,address varchar2,registerdate VARCHAR2);
+end book_package;
+```
+![](t30.png)
 
-  PROCEDURE numberOfQueries(my_class_id NUMBER);
- END MyPack;
- /
- create or replace PACKAGE BODY MyPack IS
-   PROCEDURE numberOfQueries(my_class_id NUMBER)
-   AS
-   lft integer; 
-   BEGIN
-     select id into lft
-     from student
-     where class_id=my_class_id;
-   COMMIT;
-   END numberOfQueries;
- END MyPack;
+**创建函数、存储过程**
 
- set serveroutput on
- DECLARE
-  my_class_id NUMBER;  
- BEGIN
-  my_class_id := 1;
-  MYPACK.numberOfQueries (my_class_id) ; 
- END;
-~~~
-
-<img src="images/9.png" alt="image-20191126201711814" style="zoom:50%;" />
-
-#### 9.1.2. 查询学生分数
-
-
- ~~~sql
-create or replace procedure p_contract_purchase_import(
-  V_IN_SUBCOMPANYID    in VARCHAR2,
-  V_IN_PURCONTRACTMONEY  in NUMBER,                       
-  V_IN_PARTYBNAME     in VARCHAR2, 
-  v_o_ret     out number        )
+```sql
+create or replace PACKAGE body book_package Is
  
- as
- V_SUPPLIERID      INTEGER; 
- V_PARTYBACCOUNT     VARCHAR2(100);
- V_SQLERRM     VARCHAR2(4000);
- 
- begin
- 
-  v_o_ret := 1;  
-  V_SUPPLIERID := '';
-  V_PARTYBACCOUNT := '';
- 
-  if(V_IN_PARTYBNAME is not null) then
-   begin
-    select t.SUPPLIERID,t.PARTYBACCOUNT,t.PARTYBBANK ,t.PARTYBNAME 
-     into V_SUPPLIERID,V_PARTYBACCOUNT,V_PARTYBBANK,V_PARTYBNAME
-     from T_SUPPLIER t where t.PARTYBNAME=trim(V_IN_PARTYBNAME) and t.SUBCOMPANYID=trim(V_IN_SUBCOMPANYID);
- 
-   exception
-    when others then
-     v_o_ret := 4 ; 
-     V_PARTYBNAME := V_IN_PARTYBNAME;
- 
-     V_SQLERRM := SQLERRM;
-     INSERT INTO T_LOG_DBERR
-     (ERRTIME, ERRMODEL, ERRDESC)
-     VALUES
-      (SYSDATE,
-       'PROCEDURES',
-       'p_contract_purchase_import:ret=' || v_o_ret ||','||
-     V_SQLERRM);
-     COMMIT;
-   end ;
-  end if;
- 
-   end ; 
-   commit;
-   v_o_ret :=0 ;
-  return;
- 
- EXCEPTION
-  WHEN OTHERS THEN
-   ROLLBACK;
-   V_SQLERRM := SQLERRM;
-   INSERT INTO T_LOG_DBERR
-    (ERRTIME, ERRMODEL, ERRDESC)
-   VALUES
-    (SYSDATE,
-    'PROCEDURES',
-    'p_contract_purchase_import:ret=' || v_o_ret ||','||
-    V_SQLERRM);
-   COMMIT;
- 
- end p_contract_purchase_import;
- ~~~
+       function getcartsumprice(user_id number) return number as
+          begin
+            declare cart_sum number;
+			query_sql varchar2(200);
+            begin
+			query_sql:='select sum(pricesum) from view_SinglePriceSum where ID=' || user_id;
+              execute immediate query_sql into cart_sum;
+			  return cart_sum;
+            end;
+        end getcartsumprice;
+                  procedure addUser(password varchar2,username varchar2,phone varchar2,address varchar2,registerdate varchar2) as
+            begin
+              declare maxId number;
+              begin
+                select max(id) into maxId from bookuser;
+                insert into bookuser values(maxId+1,password,username,phone,address,to_date(registerdate,'yyyy-mm-dd'),maxId+1);
+                commit;
+              end;
+            end adduser;
+    end book_package;
+```
+![](t31.png)
 
-### 9.2. 创建函数
+**存储过程、函数执行分析**
+使用自定义函数getcartsumprice（）查询id号为20011的用户购物车商品总价
 
-#### 9.2.1. 查询所有科目总学分
+```sql
+select BOOK_PACKAGE.getcartsumprice(20011) from dual;
+```
 
-~~~sql
-create or replace PACKAGE MyPack IS
- 
-  FUNCTION Get_AllCredit(V_DEPARTMENT_ID NUMBER) RETURN NUMBER;
-  
- END MyPack;
- 
- FUNCTION Get_AllCredit(V_DEPARTMENT_ID NUMBER) RETURN NUMBER
-  AS
-   N NUMBER(20,2);
-   BEGIN
-    SELECT SUM(subject.credit) into N FROM subject;
-    RETURN N;
-   END;
- END MyPack;
+![](t33.png)
+
+使用存储过程adduser插入用户数据
+
+```sql
+set serveroutput on
+declare
+begin
+BOOK_PACKAGE.addUser('131','cwd','125626','hongkong','2019-05-02');
+end;
+```
+
+![t34](t34.png)
 
 
-~~~
+**执行计划分析**
 
- <img src="images/10.png" alt="img" style="zoom:50%;" />
+```sql
+select * from BOOKUSER b,COMMODITY co,CART ca where b.id=ca.BOOKUSER_ID and ca.PID=co.PID and
+b.REGISTRATIONDATE between to_date('2018-1-1','yyyy-mm-dd') and to_date('2018-6-1','yyyy-mm-dd');
+```
 
-## 10. 数据库备份
+![](t16.png)
+
+## 四.表空间使用状况
+
+```sql
+SELECT a.tablespace_name "表空间名",
+total "表空间大小",
+free "表空间剩余大小",
+(total - free) "表空间使用大小",
+total / (1024 * 1024 * 1024) "表空间大小(G)",
+free / (1024 * 1024 * 1024) "表空间剩余大小(G)",
+(total - free) / (1024 * 1024 * 1024) "表空间使用大小(G)",
+round((total - free) / total, 4) * 100 "使用率 %"
+FROM (SELECT tablespace_name, SUM(bytes) free
+FROM dba_free_space
+GROUP BY tablespace_name) a,
+(SELECT tablespace_name, SUM(bytes) total
+FROM dba_data_files
+GROUP BY tablespace_name) b
+WHERE a.tablespace_name = b.tablespace_name
+```
+
+![](t35.png)
+
+## 五.备份恢复
+
+### 据库备份
 
 **ORACLE数据库备份与恢复详解**
 
@@ -636,284 +789,77 @@ Oracle的备份与恢复有三种标准的模式，大致分为两 大类，备�
 ~~~
 
    这样，我们就完成了一次冷备份，请确定你对这些相应的目录（包括写入的目标文件夹）有相应的权限。
-
    恢复的时候，相对比较简单了，我们停掉数据库，将文件拷贝回相应位置，重启数据库就可以了，当然也可以用脚本来完成。
 
-### 10.1. 全数据库备份
 
-~~~
-[oracle@oracle-pc ~]$ cat rman_level0.sh
- [oracle@oracle-pc ~]$ ./rman_level0.sh
-~~~
+- 备份./rman_level0.sh
 
-<img src="images/11.png" alt="img" style="zoom:50%;" />
+![](t18.png)
 
-<img src="images/12.png" alt="img" style="zoom:50%;" />
+- 查看备份内容
 
-### 10.2. 查询备份文件
+![](t19.png)
 
-~~~
-[oracle@oracle-pc ~]$ cd rman_backup
- 
- c ~]$ cd rman_backup
- [oracle@oracle-pc rman_backup]$ ll
- 总用量 777132
- -rw-rw---- 1 oracle oracle   5632 11月 26 15:17 arclv0_ORCL_20191126_9cuhrjre_1_1.bak
- -rw-rw---- 1 oracle oracle 18644992 11月 26 15:17 c-1392946895-20191126-00
- -rw-rw---- 1 oracle oracle 225976320 11月 26 15:15 dblv0_ORCL_20191126_99uhrjo4_1_1.bak
- -rw-rw---- 1 oracle oracle 386334720 11月 26 15:16 dblv0_ORCL_20191126_9auhrjp7_1_1.bak
- -rw-rw---- 1 oracle oracle 164716544 11月 26 15:16 dblv0_ORCL_20191126_9buhrjqk_1_1.bak
- -rw-rw-r-- 1 oracle oracle   51769 11月 11 00:36 lv0_20191111-003303_L0.log
- -rw-rw-r-- 1 oracle oracle   21867 11月 26 15:17 lv0_20191126-151506_L0.log
- -rw-rw-r-- 1 oracle oracle   7708 11月 11 00:37 lv1_20191111-003650_L0.log
-~~~
+![](t20.png)
 
-<img src="images/13.png" alt="img" style="zoom:50%;" />
+- 删除数据
 
-### 10.3. 查看备份文件的内容
+![](t21.png)
 
-~~~
-[oracle@oracle-pc rman_backup]$ rman target /
- 
- Recovery Manager: Release 12.1.0.2.0 - Production on 星期二 11月 26 15:39:01 2019
- 
- Copyright (c) 1982, 2014, Oracle and/or its affiliates. All rights reserved.
- 
- connected to target database: ORCL (DBID=1392946895)
- 
- RMAN> list backup;
- 
- using target database control file instead of recovery catalog
- 
- List of Backup Sets
- ===================
- 
- 
- BS Key Type LV Size    Device Type Elapsed Time Completion Time
- ------- ---- -- ---------- ----------- ------------ ---------------
- 249   Incr 0 215.50M  DISK    00:00:32   26-11月-19  
-     BP Key: 249  Status: AVAILABLE Compressed: YES Tag: TAG20191126T151516
-     Piece Name: /home/oracle/rman_backup/dblv0_ORCL_20191126_99uhrjo4_1_1.bak
-  List of Datafiles in backup set 249
-  Container ID: 3, PDB Name: PDBORCL
-  File LV Type Ckp SCN  Ckp Time  Name
-  ---- -- ---- ---------- ---------- ----
-  8  0 Incr 47696807  26-11月-19 /home/oracle/app/oracle/oradata/orcl/pdborcl/system01.dbf
-  9  0  Incr 47696807  26-11月-19 /home/oracle/app/oracle/oradata/orcl/pdborcl/sysaux01.dbf
-  10  0 Incr 47696807  26-11月-19 /home/oracle/app/oracle/oradata/orcl/pdborcl/SAMPLE_SCHEMA_users01.dbf
-  11  0 Incr 47696807  26-11月-19 /home/oracle/app/oracle/oradata/orcl/pdborcl/example01.dbf
-  12  0 Incr 47696807  26-11月-19 /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users02_1.dbf
-  13  0 Incr 47696807  26-11月-19 /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users02_2.dbf
-  16  0 Incr 47696807  26-11月-19 /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users02_3.dbf
-  17  0 Incr 47696807  26-11月-19 /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users02_4.dbf
-  77  0 Incr 47696807  26-11月-19 /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users03_1.dbf
-  78  0 Incr 47696807  26-11月-19 /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users03_2.dbf
- 
- BS Key Type LV Size    Device Type Elapsed Time Completion Time
- ------- ---- -- ---------- ----------- ------------ ---------------
- 250   Incr 0 368.43M  DISK    00:00:43   26-11月-19  
-     BP Key: 250  Status: AVAILABLE Compressed: YES Tag: TAG20191126T151516
-     Piece Name: /home/oracle/rman_backup/dblv0_ORCL_20191126_9auhrjp7_1_1.bak
-  List of Datafiles in backup set 250
-  File LV Type Ckp SCN  Ckp Time  Name
-  ---- -- ---- ---------- ---------- ----
-  1  0 Incr 47696822  26-11月-19 /home/oracle/app/oracle/oradata/orcl/system01.dbf
-  3  0 Incr 47696822  26-11月-19 /home/oracle/app/oracle/oradata/orcl/sysaux01.dbf
-  4  0 Incr 47696822  26-11月-19 /home/oracle/app/oracle/oradata/orcl/undotbs01.dbf
-  6  0 Incr 47696822  26-11月-19 /home/oracle/app/oracle/oradata/orcl/users01.dbf
- 
- BS Key Type LV Size    Device Type Elapsed Time Completion Time
- ------- ---- -- ---------- ----------- ------------ ---------------
- 251   Incr 0 157.08M  DISK    00:00:18   26-11月-19  
-     BP Key: 251  Status: AVAILABLE Compressed: YES Tag: TAG20191126T151516
-     Piece Name: /home/oracle/rman_backup/dblv0_ORCL_20191126_9buhrjqk_1_1.bak
-  List of Datafiles in backup set 251
-  Container ID: 2, PDB Name: PDB$SEED
-  File LV Type Ckp SCN  Ckp Time  Name
-  ---- -- ---- ---------- ---------- ----
-  5  0 Incr 1819408  01-12月-14 /home/oracle/app/oracle/oradata/orcl/pdbseed/system01.dbf
-  7  0 Incr 1819408  01-12月-14 /home/oracle/app/oracle/oradata/orcl/pdbseed/sysaux01.dbf
- 
- BS Key Size    Device Type Elapsed Time Completion Time
- ------- ---------- ----------- ------------ ---------------
- 252   5.00K   DISK    00:00:00   26-11月-19  
-     BP Key: 252  Status: AVAILABLE Compressed: YES Tag: TAG20191126T151702
-     Piece Name: /home/oracle/rman_backup/arclv0_ORCL_20191126_9cuhrjre_1_1.bak
- 
-  List of Archived Logs in backup set 252
-  Thrd Seq   Low SCN  Low Time  Next SCN  Next Time
-  ---- ------- ---------- ---------- ---------- ---------
-  1  1614  47696796  26-11月-19 47696850  26-11月-19
- 
- BS Key Type LV Size    Device Type Elapsed Time Completion Time
- ------- ---- -- ---------- ----------- ------------ ---------------
- 253   Full  17.77M   DISK    00:00:00   26-11月-19  
-     BP Key: 253  Status: AVAILABLE Compressed: NO Tag: TAG20191126T151703
-     Piece Name: /home/oracle/rman_backup/c-1392946895-20191126-00
-  SPFILE Included: Modification time: 26-11月-19
-  SPFILE db_uniqe_name: ORCL
-  Control File Included: Ckp SCN: 47696860   Ckp time: 26-11月-19
-~~~
+- 恢复备份
 
-### 由上面的"list backup;" 输出可以看出，备份集中的文件内容是：
+![](t22.png)
 
-•       /home/oracle/rman*backup/dblv0*ORCL*20191120*d7uhb2ap*1*1.bak 是插接数据库PDBORCL的备份集
+![](t23.png)
 
-•       /home/oracle/rman*backup/dblv0*ORCL*20191120*d8uhb2c6*1*1.bak 是ORCL的备份集
+- 数据已恢复
 
-•       /home/oracle/rman*backup/dblv0*ORCL*20191120*d9uhb2ei*1*1.bak是PDB$SEED的备份集
+![](t24.png)
 
-•       /home/oracle/rman*backup/arclv0*ORCL*20191120*dauhb2fm*1*1.bak是归档文件的备份集
 
-•       /home/oracle/rman_backup/c-1392946895-20191120-01是参数文件(SPFILE)和控制文件(Control File)的备份集
 
-### 10.4. 备份后修改数据库
 
-~~~
-[oracle@oracle-pc ~]$ sqlplus study/123@pdborcl
- SQL> create table t1 (id number,name varchar2(50));
- Table created.
- SQL> insert into t1 values(1,'zhang');
- 1 row created.
- SQL> commit;
- Commit complete.
- SQL> select * from t1;
- 
-     ID NAME
- ---------- --------------------------------------------------
-     1 zhang
- SQL> exit
-~~~
 
-<img src="images/14.png" alt="img" style="zoom:50%;" />
 
-### 10.5. 删除数据库文件模拟数据损坏
 
-~~~
-[oracle@oracle-pc ~]$ rm /home/oracle/app/oracle/oradata/orcl/pdborcl/SAMPLE_SCHEMA_users01.dbf
-~~~
 
-<img src="images/15.png" alt="img" style="zoom:50%;" />
 
-删除数据库文件后修改数据
+课程信息表
 
- 删除数据文件后，仍然可以增加一条数据。这是因为增加的数据并没有写入数据文件，而是写到了日志文件中。如果增加的数据较多的时候，就会出问题了。 
+| 属性 |  字段  |   注解   |
+| :--: | :----: | :------: |
+| 编号 |   id   | 课程编号 |
+| 名称 |  name  | 课程姓名 |
+| 学分 | credit | 课程学分 |
 
-~~~
-[oracle@oracle-pc ~]$ sqlplus study/123@pdborcl
- SQL> insert into t1 values(2,'wang');
- 1 row created.
- SQL> commit;
- Commit complete.
- SQL> select * from t1;
-     ID NAME
- ---------- --------------------------------------------------
-     1 zhang
-     2 wang
- SQL> 
-~~~
+课表信息表
 
-<img src="images/16.png" alt="img" style="zoom:50%;" />
+|   属性   |    字段    |   注解   |
+| :------: | :--------: | :------: |
+|   编号   |     id     | 课表编号 |
+| 课程编号 | subject_id | 课程编号 |
+| 班级编号 |  class_id  | 班级编号 |
+| 教师编号 | teacher_id | 教师编号 |
+|   时间   |    time    | 上课时间 |
 
-### 10.6. 数据库完全恢复
+班级信息表
 
-#### 10.6.1. 重启损坏的数据库到mount状态
+| 属性 | 字段 |   注解   |
+| :--: | :--: | :------: |
+| 编号 |  id  | 班级编号 |
+| 名称 | name | 班级名称 |
 
-通过shutdown immediate无法正常关闭数据库，只能通过shutdown abort强制关闭。然后将数据库启动到mount状态。
+教师信息表
 
-~~~
-[oracle@oracle-pc ~]$ sqlplus / as sysdba
- SQL> shutdown immediate
- ORA-01116: 打开数据库文件 10 时出错
- ORA-01110: 数据文件 10: '/home/oracle/app/oracle/oradata/orcl/pdborcl/SAMPLE_SCHEMA_users01.dbf'
- ORA-27041: 无法打开文件
- Linux-x86_64 Error: 2: No such file or directory
- Additional information: 3
- SQL> shutdown abort
- ORACLE instance shut down.
- SQL> startup mount
- ORACLE instance started.
- 
- Total System Global Area 1577058304 bytes
- Fixed Size         2924832 bytes
- Variable Size       738201312 bytes
- Database Buffers     654311424 bytes
- Redo Buffers        13848576 bytes
- In-Memory Area      167772160 bytes
- Database mounted.
-~~~
+| 属性 |    字段     |     注解     |
+| :--: | :---------: | :----------: |
+| 编号 |     id      |   教师编号   |
+| 名称 |    name     |   教师姓名   |
+| 信息 | information | 教师信息介绍 |
 
-<img src="images/16.png" alt="img" style="zoom:50%;" />
 
-#### 10.6.2. 开始恢复数据库
 
-~~~
-[oracle@oracle-pc ~]$ rman target /
- RMAN> restore database ;
- Starting restore at 20-11月-19
- using target database control file instead of recovery catalog
- allocated channel: ORA_DISK_1
- channel ORA_DISK_1: SID=243 device type=DISK
- 
- skipping datafile 5; already restored to file /home/oracle/app/oracle/oradata/orcl/pdbseed/system01.dbf
- skipping datafile 7; already restored to file /home/oracle/app/oracle/oradata/orcl/pdbseed/sysaux01.dbf
- channel ORA_DISK_1: starting datafile backup set restore
- channel ORA_DISK_1: specifying datafile(s) to restore from backup set
- channel ORA_DISK_1: restoring datafile 00008 to /home/oracle/app/oracle/oradata/orcl/pdborcl/system01.dbf
- channel ORA_DISK_1: restoring datafile 00009 to /home/oracle/app/oracle/oradata/orcl/pdborcl/sysaux01.dbf
- channel ORA_DISK_1: restoring datafile 00010 to /home/oracle/app/oracle/oradata/orcl/pdborcl/SAMPLE_SCHEMA_users01.dbf
- channel ORA_DISK_1: restoring datafile 00011 to /home/oracle/app/oracle/oradata/orcl/pdborcl/example01.dbf
- channel ORA_DISK_1: restoring datafile 00012 to /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users02_1.dbf
- channel ORA_DISK_1: restoring datafile 00013 to /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users02_2.dbf
- channel ORA_DISK_1: restoring datafile 00016 to /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users02_3.dbf
- channel ORA_DISK_1: restoring datafile 00017 to /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users02_4.dbf
- channel ORA_DISK_1: restoring datafile 00077 to /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users03_1.dbf
- channel ORA_DISK_1: restoring datafile 00078 to /home/oracle/app/oracle/oradata/orcl/pdborcl/pdbtest_users03_2.dbf
- channel ORA_DISK_1: reading from backup piece /home/oracle/rman_backup/dblv0_ORCL_20191120_d7uhb2ap_1_1.bak
- channel ORA_DISK_1: piece handle=/home/oracle/rman_backup/dblv0_ORCL_20191120_d7uhb2ap_1_1.bak tag=TAG20191120T083953
- channel ORA_DISK_1: restored backup piece 1
- channel ORA_DISK_1: restore complete, elapsed time: 00:01:41
- channel ORA_DISK_1: starting datafile backup set restore
- channel ORA_DISK_1: specifying datafile(s) to restore from backup set
- channel ORA_DISK_1: restoring datafile 00001 to /home/oracle/app/oracle/oradata/orcl/system01.dbf
- channel ORA_DISK_1: restoring datafile 00003 to /home/oracle/app/oracle/oradata/orcl/sysaux01.dbf
- channel ORA_DISK_1: restoring datafile 00004 to /home/oracle/app/oracle/oradata/orcl/undotbs01.dbf
- channel ORA_DISK_1: restoring datafile 00006 to /home/oracle/app/oracle/oradata/orcl/users01.dbf
- channel ORA_DISK_1: reading from backup piece /home/oracle/rman_backup/dblv0_ORCL_20191120_d8uhb2c6_1_1.bak
- channel ORA_DISK_1: piece handle=/home/oracle/rman_backup/dblv0_ORCL_20191120_d8uhb2c6_1_1.bak tag=TAG20191120T083953
- channel ORA_DISK_1: restored backup piece 1
- channel ORA_DISK_1: restore complete, elapsed time: 00:01:55
- Finished restore at 20-11月-19
- 
- RMAN> recover database;
- RMAN> alter database open;
- Statement processed
- RMAN> exit
-~~~
-
-<img src="images/17.png" alt="img" style="zoom:50%;" />
-
-#### 10.6.3. 查询数据是否恢复
-
-~~~
-[oracle@oracle-pc ~]$ sqlplus study/123@pdborcl
- SQL> select * from t1;
-     ID NAME
- ---------- --------------------------------------------------
-     1 zhang
-     2 wang
- SQL> 
-~~~
-
-<img src="images/19.png" alt="img" style="zoom:50%;" />
-
- 
-
- 
-
- 由以上查询结果可见，数据100%恢复了! 
-
-## 11. DataGuard实现数据库整体的异地备份
+### 六taGuard实现数据库整体的异地备份
 
  Data Guard 是Oracle的集成化灾难恢复解决方案，该技术可以维护生产数据库一个或多个同步备份，由一个主数据库和多个备用数据库组成，并形成一个独立的、易于管理的数据保护方案。
 Data Guard 备用数据库可以与主系统位于相同的数据中心，也可以是在地理位置上分布较远的远程灾难备份中心。
