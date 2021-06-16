@@ -563,7 +563,7 @@ select * from view_SinglePriceSum;
 **用户xgh_1空间不足，修改xgh_1空间大小**
 
 ```sql
-ALTER USER wmj_1 QUOTA 90M ON space_xgh001;
+ALTER USER xgh_1 QUOTA 90M ON space_xgh001;
 ```
 
 ### 3. 插入用户、商品、购物车数据(向数据库中写入数据共计50000多个数据)
