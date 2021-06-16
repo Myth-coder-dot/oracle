@@ -55,7 +55,7 @@ CREATE USER xgh_1 IDENTIFIED BY 123 DEFAULT TABLESPACE space_xgh001 TEMPORARY TA
 
 ALTER USER xgh_1 QUOTA 60M ON space_xgh001;
 
-GRANT wmj1 TO xgh_1;
+GRANT xgh1 TO xgh_1;
 ```
 
  ![i3](./3.png)
