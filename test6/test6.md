@@ -450,6 +450,7 @@ CREATE TABLE TABLE1
 );
 ```
   ![i9](./9.png)
+  
 ## 三. 数据库查询
 
 ## 1. 添加用户及权限管理
@@ -510,7 +511,7 @@ create user xgh_user2 IDENTIFIED by 123;
 alter user xgh_user1 quota unlimited on space_xgh001 ;
 alter user xgh_user2 quota unlimited on space_xgh001;
 ```
-
+  ![](./25.png)
 ```sql
 (2)创建两个角色xgh_role1，xgh_role2，并分别赋予xgh_role1，xgh_role2读任何表和读、修改任何表的权利
 create role xgh_role1;
@@ -519,14 +520,14 @@ grant select any table to xgh_role1;
 grant select any table to xgh_role2;
 grant update any table to xgh_role2;
 ```
-
+  ![](./26.png)
 
 ```sql
 (3)将xgh_role1，xgh_role2分别赋予给用户xgh_user1，xgh_user2
 grant xgh_role1 to xgh_user1;
 grant xgh_role2 to xgh_user2;
 ```
-
+  ![](./27.png)
 ## 2.创建视图计算每个用户购车中单个商品的总价
 
 - 视图(view)，也称虚表, 不占用物理空间，这个也是相对概念，因为视图本身的定义语句还是要存储在数据字典里的。视图只有逻辑定义。每次使用的时候,只是重新执行SQL。
