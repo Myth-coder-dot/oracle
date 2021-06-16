@@ -504,22 +504,28 @@ sqlplusw study/study@test   然后就可以在用户study中创建数据表了
 格式: create table 数据表名 
 
 (1)分别创建两个用户xgh_user1和xgh_user2,并允许他们是使用xgh_space1表空间
+```sql
 create user xgh_user1 IDENTIFIED by 123;
 create user xgh_user2 IDENTIFIED by 123;
 alter user xgh_user1 quota unlimited on space_xgh001 ;
 alter user xgh_user2 quota unlimited on space_xgh001;
+```
 
+```sql
 (2)创建两个角色xgh_role1，xgh_role2，并分别赋予xgh_role1，xgh_role2读任何表和读、修改任何表的权利
 create role xgh_role1;
 create role xgh_role2;
 grant select any table to xgh_role1;
 grant select any table to xgh_role2;
 grant update any table to xgh_role2;
+```
 
 
+```sql
 (3)将xgh_role1，xgh_role2分别赋予给用户xgh_user1，xgh_user2
 grant xgh_role1 to xgh_user1;
 grant xgh_role2 to xgh_user2;
+```
 
 ## 2.创建视图计算每个用户购车中单个商品的总价
 
